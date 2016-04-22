@@ -1,0 +1,3 @@
+/^.{12}(\x00|\x01)\x00\x00(\x70|\x71)/smi
+/exec_sdbinfo\s+[\x26\x3b\x7c\x3e\x3c]/i
+/select\s+xmlquery\s*\x28\s*(\x27|\x22)[^\x27\x22]{512}/smi

@@ -1,0 +1,16 @@
+/^APOP\s[^\n]{256}/smi
+/^APOP\s+USER\s[^\n]{256}/smi
+/^AUTH\s[^\n]{50}/smi
+/^CAPA\s[^\n]{10}/smi
+/^DELE\s+-\d/smi
+/^DELE\s[^\n]{10}/smi
+/^LIST\s[^\n]{10}/smi
+/^PASS\s[^\n]{50}/smi
+/^PASS\s+[^\n]*?%/smi
+/^RSET\s[^\n]{10}/smi
+/^STAT\s[^\n]{10}/smi
+/^TOP\s[^\n]{50}/smi
+/^UIDL\s+-\d/smi
+/^USER\s[^\n]{50,}/smi
+/^USER\s+[^\n]*?%/smi
+/^XTND\s[^\n]{50}/smi

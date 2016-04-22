@@ -1,0 +1,4 @@
+/^.{20}(\x00\x00\x00\x00|.{12})/sR
+/^Authorization\x3a\s*Negotiate\s*((YE4G.{40}LgMc)|(YIIQ.{40}QUFB))/smi
+/^Cookie\x3A\s+[^\r\n]*dun_other\s*=\s*[^\r\n]+/smi
+/\x99{40}\xeb\x12\x01\x99{4}\x18A{5}.{4}A{6}/sm

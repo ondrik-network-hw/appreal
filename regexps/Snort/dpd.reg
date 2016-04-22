@@ -1,0 +1,17 @@
+/^.*\/announce\?.*info_hash/
+/^HTTP\/[0-9]/
+/[\n\r ]*(120|220)[^0-9].*[\n\r] *(230|331)[^0-9]/
+/^(|.*[\n\r])(:[^ \n\r]+ )?[0-9][0-9][0-9] /
+/(|.*[\n\r])[[:space:]]*([hH][eE][lL][oO]|[eE][hH][lL][oO])/
+/(|.*[\n\r]) *[uU][sS][eE][rR] /
+/^\+OK/
+/(|.*[\r\n]) *[Nn][Ii][Cc][Kk] +.+[\r\n]+ *[Uu][Ss][Ee][Rr] +.+[\r\n]/
+/(|.*[\r\n])[[:space:]]*([uU][sS][eE][rR][[:space:]]|[aA][pP][oO][pP][[:space:]]|[cC][aA][pP][aA]|[aA][uU][tT][hH])/
+/(|.*[\r\n]) *[Uu][Ss][Ee][Rr] +.+[\n\r]+ *[Nn][Ii][Cc][Kk] +.*[\r\n]/
+/^[[:space:]]*220[[:space:]-]/
+/^[[:space:]]*(GET|HEAD|POST)[[:space:]]*/
+/^[sS][sS][hH]-/
+/(.*\x0a)*(\x20)*[Ss][Ee][Rr][Vv][Ee][Rr](\x20)+.+\x0a/
+/^\x13BitTorrent protocol/
+/^(\x16\x03[\x00\x01\x02]..\x01...\x03[\x00\x01\x02]|...?\x01[\x00\x01\x02][\x02\x03]).*/
+/^(\x16\x03[\x00\x01\x02]..\x02...\x03[\x00\x01\x02]|...?\x04..\x00\x02).*/

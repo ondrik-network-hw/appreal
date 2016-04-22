@@ -1,0 +1,12 @@
+/^AUTHINFO\s+USER\s[^\n]{200}/smi
+/^cancel\x3a[^\n]{32}/smi
+/^checkgroups\x3a[^\n]{21}/smi
+/^ihave\x3a[^\n]{21}/smi
+/^newgroup\x3a[^\n]{32}/smi
+/^rmgroup\x3a[^\n]{32}/smi
+/^SEARCH\s+[^\n]{1024}/smi
+/^sendme\x3a[^\n]{21}/smi
+/^sendsys\x3a[^\n]{21}/smi
+/^senduuname\x3a[^\n]{21}/smi
+/^version\x3a[^\n]{21}/smi
+/^X?PAT\s+[^\n]{1024}/smi

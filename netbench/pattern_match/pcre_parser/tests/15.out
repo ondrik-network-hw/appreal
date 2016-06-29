@@ -1,0 +1,46 @@
+lex	: modif_front: SLASH
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_front <<< pcre_delim
+lex	: OPT_CR
+yacc	: newlinespec_unit <<< OPT_CR
+lex	: OPT_LF
+yacc	: newlinespec_unit <<< OPT_LF
+lex	: OPT_CRLF
+yacc	: newlinespec_unit <<< OPT_CRLF
+lex	: OPT_ANYCRLF
+yacc	: newlinespec_unit <<< OPT_ANYCRLF
+lex	: OPT_ANY_NEWLINE
+yacc	: newlinespec_unit <<< OPT_ANY_NEWLINE
+lex	: ASCII p
+yacc	: newlinespec <<< newlinespec_unit
+yacc	: newlinespec <<< newlinespec_unit-newlinespec
+yacc	: newlinespec <<< newlinespec_unit-newlinespec
+yacc	: newlinespec <<< newlinespec_unit-newlinespec
+yacc	: newlinespec <<< newlinespec_unit-newlinespec
+yacc	: element <<< ASCII p
+yacc	: unit <<< element
+lex	: ASCII c
+yacc	: ext_unit <<< unit
+yacc	: element <<< ASCII c
+yacc	: unit <<< element
+lex	: ASCII r
+yacc	: ext_unit <<< unit
+yacc	: element <<< ASCII r
+yacc	: unit <<< element
+lex	: ASCII e
+yacc	: ext_unit <<< unit
+yacc	: element <<< ASCII e
+yacc	: unit <<< element
+lex	: SLASH
+yacc	: ext_unit <<< unit
+yacc	: exp <<< ext_unit
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: ext_exp <<< exp
+yacc	: rv <<< ext_exp
+yacc	: inslash <<< rv
+yacc	: pattern <<< newlinespec inslash
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_rear <<< pcre_delim
+yacc	: pcre <<< modif_front pattern modif_rear

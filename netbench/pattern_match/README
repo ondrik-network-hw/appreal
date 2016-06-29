@@ -1,0 +1,39 @@
+Accelerated Network Technologies @ FIT - NetBench
+=================================================
+
+Software requirements:
+1) Python module "bitstring" which can be downloaded from
+   http://code.google.com/p/python-bitstring/
+2) Tests of clark_nfa, sindhu_prasana-nfa, sourdis_bispo_nfa and nfa_split 
+require Modelsim.
+
+Directory structure:
+algorithms  - Implementation of pattern match algorithms
+bin         - Contains various used Python modules and various tools for 
+              handling of network data
+experiments - Demonstration of pattern match experiments. Currently contains
+              comparison of DFA based and NFA based algorithms.
+pcre_parser - Parser of regular expressions in PCRE format. Output of this 
+              parser is description of automaton in MSFM format version 2. For 
+              description of this format see pcre_parser.py.
+rules       - Sets of RE from L7 decoder, Snort and Bro IDS.
+tests       - Unit tests for basic Netbench - Pattern Match classes.
+vhdl        - VHDL templates and components used by some pattern match 
+              algorithms.
+.           - Implementation of basic Netbench - Pattern Match classes.
+
+Each of the implemented algorithms has its own test script and script 
+demonstrating usage of the algorithm. The name of the test scripts starts 
+with test_. Tne name of demonstration scripts is example_of_use.py. Test 
+scripts are either in directory of the algorithm or in directory tests. Tests 
+can run up to several minutes depending on processor type and speed.
+
+Makefile with targets test or run can be also used to run test or example of 
+use. The doc target generates documentation of selected algorithm. Makefile 
+can be also run from parent directories to run tests or examples of use for
+all algorithms in directory and in any subdirectories. The doc target also
+display documentation for all algorithms in directory and in any subdiretories.
+Target help will display info about those targets. Complete documentation of
+pattern match can be obtained by runing Makefile with target doc in base 
+directory of pattern match.
+

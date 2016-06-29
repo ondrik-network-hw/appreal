@@ -1,0 +1,51 @@
+lex	: modif_front: SLASH
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_front <<< pcre_delim
+lex	: ASCII p
+yacc	: element <<< ASCII p
+yacc	: unit <<< element
+lex	: ASCII c
+yacc	: ext_unit <<< unit
+yacc	: element <<< ASCII c
+yacc	: unit <<< element
+lex	: LBOX
+yacc	: ext_unit <<< unit
+yacc	: classStart <<< LBOX
+lex	: class: ASCII r
+yacc	: element <<< ASCII r
+yacc	: inclass_unit <<< inclass_element
+lex	: RBOX
+yacc	: inclass_ext_unit <<< inclass_unit
+yacc	: inclass <<< inclass_ext_unit
+yacc	: classEnd <<< RBOX
+yacc	: class <<< classStart inclass classEnd
+yacc	: unit <<< class
+lex	: ZEROMORE
+yacc	: quantifier <<< ZEROMORE
+lex	: ASCII e
+yacc	: quantify <<< quantifier
+yacc	: quantify_unit <<< unit quantify
+yacc	: ext_unit <<< quantify_unit
+yacc	: element <<< ASCII e
+yacc	: unit <<< element
+lex	: SLASH
+yacc	: ext_unit <<< unit
+yacc	: exp <<< ext_unit
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: ext_exp <<< exp
+yacc	: rv <<< ext_exp
+yacc	: inslash <<< rv
+yacc	: pattern <<< inslash
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_rear_unit <<< MODIF_CASELESS
+yacc	: modif_rear_unit <<< MODIF_DOTALL
+yacc	: modif_rear_unit <<< MODIF_MULTILINE
+yacc	: modif_rear_unit <<< MODIF_EXTENDED
+yacc	: modif_rear_ext <<< modif_rear_unit
+yacc	: modif_rear_ext <<< modif_rear_unit-modif_rear_ext
+yacc	: modif_rear_ext <<< modif_rear_unit-modif_rear_ext
+yacc	: modif_rear_ext <<< modif_rear_unit-modif_rear_ext
+yacc	: modif_rear <<< pcre_delim-modif_rear_ext
+yacc	: pcre <<< modif_front pattern modif_rear

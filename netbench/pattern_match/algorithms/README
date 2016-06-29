@@ -1,0 +1,67 @@
+This README is valid only for algorithms: delay_dfa, hybrid_fa, history_fa, extend_fa
+Even those algorithms support Makefile parameters run, test, doc, clean and help as
+described in README in base directory of pattern match.
+
+Experimental subdirectory contains algorithms which are still experimental and they 
+can change frequently and/or be incomplete but they should work anyway.
+
+Instructions how work with algorithms :
+=======================================
+
+1)  cd delay_dfa
+
+  Open directory with given algorithm.
+
+
+2)  vim example_of_use.py
+
+  If you want, then edit file 'example_of_use.py' which is already adjusted.
+
+!!  In this file is path to Regular Expressions and name of output file,
+!!  which represent given automaton and is input into program written
+!!  in C language.
+
+
+3)  make run
+
+  File 'Makefile' is adjusted to run script 'example_of_use.py' (create file
+  'parse') and compile file "algorithm.c" (create executable file
+  "algorithm").
+  After typing make run you will see many output, this is because in script
+  'example_of_use.py' is called function show(), which display automat(s)
+  (printing states, alphabet, transitions, etc.). If you are interested only
+  in result (data (not) match any RE), then comment this line.
+
+
+4)  echo string > data
+
+  Insert file 'data' with chars. This file will be compared with Regular
+  Expressions.
+
+
+5)  make runc
+
+  Execute file "algorithm" with two arguments (two files: 'parse', 'data').
+
+  After make run you should see result (a or b):
+
+  a)  string is agreement with any Regular Expression:
+
+  *** Result: match ***
+
+  b)  string is not agreement with any Regular Expression:
+
+  *** Result: NOT match ***
+  
+*)  If you want try match another string then just edit file 'data'. Now
+    you can easily use command make run.
+
+
+Notes:
+======
+
+For display 'dot' file you can use next command (must be installed
+graphviz):
+
+  dot -Tps automat.dot > automat.ps
+

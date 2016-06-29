@@ -1,0 +1,128 @@
+lex	: modif_front: SLASH
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_front <<< pcre_delim
+lex	: BOL
+yacc	: bol <<< BOL
+lex	: LPAR
+yacc	: startCapturing <<< LPAR
+lex	: ASCII $
+yacc	: element <<< ASCII $
+yacc	: unit <<< element
+lex	: ASCII m
+yacc	: ext_unit <<< unit
+yacc	: element <<< ASCII m
+yacc	: unit <<< element
+lex	: ASCII y
+yacc	: ext_unit <<< unit
+yacc	: element <<< ASCII y
+yacc	: unit <<< element
+lex	: ASCII n
+yacc	: ext_unit <<< unit
+yacc	: element <<< ASCII n
+yacc	: unit <<< element
+lex	: ASCII i
+yacc	: ext_unit <<< unit
+yacc	: element <<< ASCII i
+yacc	: unit <<< element
+lex	: ASCII c
+yacc	: ext_unit <<< unit
+yacc	: element <<< ASCII c
+yacc	: unit <<< element
+lex	: ASCII k
+yacc	: ext_unit <<< unit
+yacc	: element <<< ASCII k
+yacc	: unit <<< element
+lex	: ASCII SPACE 
+yacc	: ext_unit <<< unit
+yacc	: element <<< SPACE
+yacc	: unit <<< element
+lex	: OR
+yacc	: ext_unit <<< unit
+yacc	: exp <<< ext_unit
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: ext_exp <<< exp
+yacc	: rv <<< ext_exp
+yacc	: or <<< OR
+lex	: ASCII $
+yacc	: element <<< ASCII $
+yacc	: unit <<< element
+lex	: ASCII l
+yacc	: ext_unit <<< unit
+yacc	: element <<< ASCII l
+yacc	: unit <<< element
+lex	: ASCII o
+yacc	: ext_unit <<< unit
+yacc	: element <<< ASCII o
+yacc	: unit <<< element
+lex	: ASCII c
+yacc	: ext_unit <<< unit
+yacc	: element <<< ASCII c
+yacc	: unit <<< element
+lex	: ASCII k
+yacc	: ext_unit <<< unit
+yacc	: element <<< ASCII k
+yacc	: unit <<< element
+lex	: ASCII SPACE 
+yacc	: ext_unit <<< unit
+yacc	: element <<< SPACE
+yacc	: unit <<< element
+lex	: OR
+yacc	: ext_unit <<< unit
+yacc	: exp <<< ext_unit
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: ext_exp <<< exp
+yacc	: rv <<< ext_exp
+yacc	: or <<< OR
+lex	: ASCII $
+yacc	: element <<< ASCII $
+yacc	: unit <<< element
+lex	: ASCII k
+yacc	: ext_unit <<< unit
+yacc	: element <<< ASCII k
+yacc	: unit <<< element
+lex	: ASCII e
+yacc	: ext_unit <<< unit
+yacc	: element <<< ASCII e
+yacc	: unit <<< element
+lex	: ASCII y
+yacc	: ext_unit <<< unit
+yacc	: element <<< ASCII y
+yacc	: unit <<< element
+lex	: ASCII SPACE 
+yacc	: ext_unit <<< unit
+yacc	: element <<< SPACE
+yacc	: unit <<< element
+lex	: RPAR
+yacc	: ext_unit <<< unit
+yacc	: exp <<< ext_unit
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: ext_exp <<< exp
+yacc	: rv <<< ext_exp
+yacc	: rv <<< rv-or|rv
+yacc	: rv <<< rv-or|rv
+yacc	: endCapturing <<< RPAR
+yacc	: capturing <<< startCapturing rv endCapturing
+yacc	: unit <<< capturing
+lex	: SLASH
+yacc	: ext_unit <<< unit
+yacc	: exp <<< ext_unit
+yacc	: ext_exp <<< exp
+yacc	: rv <<< ext_exp
+yacc	: inslash <<< bol-rv
+yacc	: pattern <<< inslash
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_rear <<< pcre_delim
+yacc	: pcre <<< modif_front pattern modif_rear

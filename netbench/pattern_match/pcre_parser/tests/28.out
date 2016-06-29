@@ -1,0 +1,24 @@
+lex	: modif_front: SLASH
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_front <<< pcre_delim
+lex	: LBOX
+yacc	: classStart <<< LBOX
+lex	: OCTAL \053
+yacc	: inclass_element <<< OCTAL +
+yacc	: inclass_unit <<< inclass_element
+lex	: RBOX
+yacc	: inclass_ext_unit <<< inclass_unit
+yacc	: inclass <<< inclass_ext_unit
+yacc	: classEnd <<< RBOX
+yacc	: class <<< classStart inclass classEnd
+yacc	: unit <<< class
+lex	: SLASH
+yacc	: ext_unit <<< unit
+yacc	: exp <<< ext_unit
+yacc	: ext_exp <<< exp
+yacc	: rv <<< ext_exp
+yacc	: inslash <<< rv
+yacc	: pattern <<< inslash
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_rear <<< pcre_delim
+yacc	: pcre <<< modif_front pattern modif_rear

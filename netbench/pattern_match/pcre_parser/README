@@ -1,0 +1,37 @@
+Implementace PCRE pomocí konečných automatů
+-------------------------------------------
+
+Parser převádí PCRE vzory do podoby konečných automatů.
+https://merlin.fit.vutbr.cz/wiki-ant/index.php/NetBench:Koncepce_parseru_PCRE_v%C3%BDraz%C5%AF
+
+Programy
+********
+
+- parser
+    - modul, který z derivačního stromu vygeneruje nedeterministický konečný automat
+    - výstup automatu probíhá do formátu MSFM a nezávisle do formátu DOT
+
+- painter
+    - modul, který vykreslí derivační strom do formátu DOT
+
+- tester
+    - modul, který nic nevykresluje ani neukládá => vhodný pro testování
+
+Překlad aplikace
+****************
+- překlad všech binárních souborů najednou
+    > make
+- překlad programu parser
+    > make parser
+- překlad programu painter
+    > make painter
+- překlad programu tester
+    > make tester
+
+Spuštění aplikace
+*****************
+	> ./(parser|painter|tester) <<< "pcre_pattern"
+
+Vykreslení formátu DOT (viz modul painter, parser)
+********************************************
+	> make graph

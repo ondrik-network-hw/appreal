@@ -1,0 +1,9 @@
+digraph " Automat " {
+    rankdir=LR;
+  size="8,5"
+node [shape = doublecircle];
+1;
+node [shape=circle];
+0 -> 1 [ label = "a" ];
+1 -> 1 [ label = "a" ];
+}

@@ -1,0 +1,10 @@
+/Cookie\x3A.*s_sq=aolsnssignin/si
+/GET\s+[^\x20]*\x2Ewm[zd]/smi
+/mstshash\s*\x3d\s*Administr/smi
+/SILC\x2d\d\x2e\d/smi
+/User-Agent\x3A[^\n\r]+Google[^\n\r]+Desktop/smi
+/[\x01|\x02|\x03|\x04|\x05|\x06|\x07]\x00.{4}\x43\x00/R
+/[\x05|\x06|\x07]\x00.{6}[SS|DS]/R
+/[\x05-t][bcdfghjklmnpqrstvwxyz]{5,32}\x02cn/i
+/[\x05-t][bcdfghjklmnpqrstvwxyz]{5,32}\x02ru/i
+/^X-LINK2STATE\s+CHUNK/smi

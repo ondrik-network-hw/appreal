@@ -1,0 +1,27 @@
+lex	: modif_front: SLASH
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_front <<< pcre_delim
+lex	: BOL
+yacc	: bol <<< BOL
+lex	: ASCII p
+yacc	: element <<< ASCII p
+yacc	: unit <<< element
+lex	: ASCII c
+yacc	: ext_unit <<< unit
+yacc	: element <<< ASCII c
+yacc	: unit <<< element
+lex	: EOL
+yacc	: ext_unit <<< unit
+yacc	: exp <<< ext_unit
+yacc	: exp <<< ext_unit-exp
+yacc	: eol <<< EOL
+yacc	: ext_exp <<< exp-eol
+yacc	: rv <<< ext_exp
+lex	: SLASH
+yacc	: inslash <<< bol-rv
+yacc	: pattern <<< inslash
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_rear_unit <<< MODIF_MULTILINE
+yacc	: modif_rear_ext <<< modif_rear_unit
+yacc	: modif_rear <<< pcre_delim-modif_rear_ext
+yacc	: pcre <<< modif_front pattern modif_rear

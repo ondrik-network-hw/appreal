@@ -1,0 +1,16 @@
+/admin_root=(https?|ftps?|php)/
+/b2inc=(https?|ftps?|php)/i
+/cache_lastpostdate\[[^\]]+\]=[^\x00\x3B\x3D]{30}/smi
+/comment=[^\x26\s]*[\x2f\x5c]/sUmi
+/forum=.*'/
+/GALLERY_BASEDIR=(https?|ftps?|php)/Ui
+/page=(https?|ftps?|php)/Ui
+/path=(https?|ftps?|php)/i
+/pm_path=(https?|ftps?|php)/
+/^POST\s/smi
+/Server\x5bpath\x5d=(https?|ftps?|php)/
+/systempath=(https?|ftps?|php)/i
+/template=(https?|ftps?|php)/i
+/template\s*=\s*\x7b\x24/sUmi
+/[\?\x20\x3b\x26]module=[a-zA-Z0-9]*[^\x3b\x26]/U
+/\x22method\x22\s*\x3a\s*\x22[A-Z]\w*[^\x22]/smi

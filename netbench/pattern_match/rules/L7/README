@@ -1,0 +1,4 @@
+great.pcre and good.pcre taken from http://l7-filter.sourceforge.net/protocols
+great.pcre marked as 'great'
+good.pcre marked as 'good'
+great-good.pcre merges great.pcre and good.pcre

@@ -1,0 +1,89 @@
+lex	: modif_front: SLASH
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_front <<< pcre_delim
+lex	: P_ALNUM
+yacc	: posix_class <<< P_ALNUM
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: P_ALPHA
+yacc	: ext_unit <<< unit
+yacc	: posix_class <<< P_ALPHA
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: P_ASCII
+yacc	: ext_unit <<< unit
+yacc	: posix_class <<< P_ASCII
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: P_BLANK
+yacc	: ext_unit <<< unit
+yacc	: posix_class <<< P_BLANK
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: P_CNTRL
+yacc	: ext_unit <<< unit
+yacc	: posix_class <<< P_CNTRL
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: P_GRAPH
+yacc	: ext_unit <<< unit
+yacc	: posix_class <<< P_GRAPH
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: P_LOWER
+yacc	: ext_unit <<< unit
+yacc	: posix_class <<< P_LOWER
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: P_PRINT
+yacc	: ext_unit <<< unit
+yacc	: posix_class <<< P_PRINT
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: P_PUNCT
+yacc	: ext_unit <<< unit
+yacc	: posix_class <<< P_PUNCT
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: P_SPACE
+yacc	: ext_unit <<< unit
+yacc	: posix_class <<< P_SPACE
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: P_UPPER
+yacc	: ext_unit <<< unit
+yacc	: posix_class <<< P_UPPER
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: P_WORD
+yacc	: ext_unit <<< unit
+yacc	: posix_class <<< P_WORD
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: P_XDIGIT
+yacc	: ext_unit <<< unit
+yacc	: posix_class <<< P_XDIGIT
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: SLASH
+yacc	: ext_unit <<< unit
+yacc	: exp <<< ext_unit
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: ext_exp <<< exp
+yacc	: rv <<< ext_exp
+yacc	: inslash <<< rv
+yacc	: pattern <<< inslash
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_rear <<< pcre_delim
+yacc	: pcre <<< modif_front pattern modif_rear

@@ -1,0 +1,61 @@
+lex	: modif_front: SLASH
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_front <<< pcre_delim
+lex	: BEL
+yacc	: element <<< BEL
+yacc	: unit <<< element
+lex	: CONTROLX a
+yacc	: ext_unit <<< unit
+yacc	: element <<< CONTROLX a
+yacc	: unit <<< element
+lex	: CONTROLX /
+yacc	: ext_unit <<< unit
+yacc	: element <<< CONTROLX /
+yacc	: unit <<< element
+lex	: CONTROLX C
+yacc	: ext_unit <<< unit
+yacc	: element <<< CONTROLX C
+yacc	: unit <<< element
+lex	: CONTROLX \
+yacc	: ext_unit <<< unit
+yacc	: element <<< CONTROLX \
+yacc	: unit <<< element
+lex	: ESC
+yacc	: ext_unit <<< unit
+yacc	: element <<< ESC
+yacc	: unit <<< element
+lex	: FF
+yacc	: ext_unit <<< unit
+yacc	: element <<< FF
+yacc	: unit <<< element
+lex	: LF
+yacc	: ext_unit <<< unit
+yacc	: element <<< LF
+yacc	: unit <<< element
+lex	: CR
+yacc	: ext_unit <<< unit
+yacc	: element <<< CR
+yacc	: unit <<< element
+lex	: TAB
+yacc	: ext_unit <<< unit
+yacc	: element <<< TAB
+yacc	: unit <<< element
+lex	: SLASH
+yacc	: ext_unit <<< unit
+yacc	: exp <<< ext_unit
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: ext_exp <<< exp
+yacc	: rv <<< ext_exp
+yacc	: inslash <<< rv
+yacc	: pattern <<< inslash
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_rear <<< pcre_delim
+yacc	: pcre <<< modif_front pattern modif_rear

@@ -1,0 +1,12 @@
+/^ajprot\x0d\x0a/
+/^.?.?.?.?[\x01\x02].?.?.?.?.?.?[\x01-?][a-z0-9][\x01-?a-z]*[\x02-\x06][a-z][a-z][fglmoprstuvz]?[aeop]?(um)?[\x01-\x10\x1c][\x01\x03\x04\xFF]/
+/^220[\x09-\x0d -~]*ftp/
+/^gkrellm [23].[0-9].[0-9]\x0a$/
+/^\|\/dev\/[a-z][a-z][a-z]\|[0-9a-z]*\|[0-9][0-9]\|[cfk]\|/
+/http\/(0\.9|1\.0|1\.1) [1-5][0-9][0-9] [\x09-\x0d -~]*(connection:|content-type:|content-length:|date:)|post [\x09-\x0d -~]* http\/[01]\.[019]/
+/^(\* ok|a[0-9]+ noop)/
+/^(nick[\x09-\x0d -~]*user[\x09-\x0d -~]*:|user[\x09-\x0d -~]*:[\x02-\x0d -~]*nick[\x09-\x0d -~]*\x0d\x0a)/
+/^(\+ok |-err )/
+/^220[\x09-\x0d -~]* (e?smtp|simple mail)/
+/^ssh-[12]\.[0-9]/
+/^rfb 00[1-9]\.00[0-9]\x0a$/

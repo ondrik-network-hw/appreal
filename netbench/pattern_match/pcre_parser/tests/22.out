@@ -1,0 +1,60 @@
+lex	: modif_front: SLASH
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_front <<< pcre_delim
+lex	: LBOX
+yacc	: classStart <<< LBOX
+lex	: BEL
+yacc	: inclass_element <<< BEL
+yacc	: inclass_unit <<< inclass_element
+lex	: CONTROLX a
+yacc	: inclass_element <<< CONTROLX a
+yacc	: inclass_unit <<< inclass_element
+lex	: CONTROLX /
+yacc	: inclass_element <<< CONTROLX /
+yacc	: inclass_unit <<< inclass_element
+lex	: CONTROLX C
+yacc	: inclass_element <<< CONTROLX C
+yacc	: inclass_unit <<< inclass_element
+lex	: CONTROLX \
+yacc	: inclass_element <<< CONTROLX \
+yacc	: inclass_unit <<< inclass_element
+lex	: ESC
+yacc	: inclass_element <<< ESC
+yacc	: inclass_unit <<< inclass_element
+lex	: FF
+yacc	: inclass_element <<< FF
+yacc	: inclass_unit <<< inclass_element
+lex	: LF
+yacc	: inclass_element <<< LF
+yacc	: inclass_unit <<< inclass_element
+lex	: CR
+yacc	: inclass_element <<< CR
+yacc	: inclass_unit <<< inclass_element
+lex	: TAB
+yacc	: inclass_element <<< TAB
+yacc	: inclass_unit <<< inclass_element
+lex	: RBOX
+yacc	: inclass_ext_unit <<< inclass_unit
+yacc	: inclass_ext_unit <<< inclass_unit-inclass_ext_unit
+yacc	: inclass_ext_unit <<< inclass_unit-inclass_ext_unit
+yacc	: inclass_ext_unit <<< inclass_unit-inclass_ext_unit
+yacc	: inclass_ext_unit <<< inclass_unit-inclass_ext_unit
+yacc	: inclass_ext_unit <<< inclass_unit-inclass_ext_unit
+yacc	: inclass_ext_unit <<< inclass_unit-inclass_ext_unit
+yacc	: inclass_ext_unit <<< inclass_unit-inclass_ext_unit
+yacc	: inclass_ext_unit <<< inclass_unit-inclass_ext_unit
+yacc	: inclass_ext_unit <<< inclass_unit-inclass_ext_unit
+yacc	: inclass <<< inclass_ext_unit
+yacc	: classEnd <<< RBOX
+yacc	: class <<< classStart inclass classEnd
+yacc	: unit <<< class
+lex	: SLASH
+yacc	: ext_unit <<< unit
+yacc	: exp <<< ext_unit
+yacc	: ext_exp <<< exp
+yacc	: rv <<< ext_exp
+yacc	: inslash <<< rv
+yacc	: pattern <<< inslash
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_rear <<< pcre_delim
+yacc	: pcre <<< modif_front pattern modif_rear

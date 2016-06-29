@@ -1,0 +1,29 @@
+/^ajprot\x0d\x0a/
+/^(\x13bittorrent protocol|azver\x01$|get \/scrape\?info_hash=get \/announce\?info_hash=|get \/client\/bitcomet\/|GET \/data\?fid=)|d1:ad2:id20:|\x08'7P\)[RP]/
+/^\xff\xff\xff\xff.*cstrikeCounter-Strike/
+/^(\$mynick |\$lock |\$key )/
+/^.?.?.?.?[\x01\x02].?.?.?.?.?.?[\x01-?][a-z0-9][\x01-?a-z]*[\x02-\x06][a-z][a-z][fglmoprstuvz]?[aeop]?(um)?[\x01-\x10\x1c][\x01\x03\x04\xFF]/
+/^\xff\xffchallenge/
+/^[\xc5\xd4a-c].?.?.?.?([\x01\x02\x05\x14\x15\x16\x18\x19\x1a\x1b\x1c\x20\x21\x32\x33\x34\x35\x36\x38\x40\x41\x42\x43\x46\x47\x48\x49\x4a\x4b\x4c\x4d\x4e\x4f\x50\x51\x52\x53\x54\x55\x56\x57\x58[\x60\x81\x82\x90\x91\x93\x96\x97\x98\x99\x9a\x9b\x9c\x9e\xa0\xa1\xa2\xa3\xa4]|\x59................?[ -~]|\x96....$)/
+/^220[\x09-\x0d -~]*ftp/
+/^gkrellm [23].[0-9].[0-9]\x0a$/
+/http\/(0\.9|1\.0|1\.1) [1-5][0-9][0-9] [\x09-\x0d -~]*(connection:|content-type:|content-length:|date:)|post [\x09-\x0d -~]* http\/[01]\.[019]/
+/^(\* ok|a[0-9]+ noop)/
+/^(nick[\x09-\x0d -~]*user[\x09-\x0d -~]*:|user[\x09-\x0d -~]*:[\x02-\x0d -~]*nick[\x09-\x0d -~]*\x0d\x0a)/
+/<stream:stream[\x09-\x0d ][ -~]*[\x09-\x0d ]xmlns=['"]jabber/
+/^(ver [ -~]*msnftp\x0d\x0aver msnftp\x0d\x0ausr|method msnmsgr:)/
+/\x01\x10\x01|\)\x10\x01\x01|0\x10\x01/
+/^(\+ok |-err )/
+/rtsp\/1.0 200 ok/
+/^get \/.*icy-metadata:1|icy [1-5][0-9][0-9] [\x09-\x0d -~]*(content-type:audio|icy-)/
+/^(invite|register|cancel|message|subscribe|notify) sip[\x09-\x0d -~]*sip\/[0-2]\.[0-9]/
+/\xffsmb[\x72\x25]/
+/^220[\x09-\x0d -~]* (e?smtp|simple mail)/
+/^\x02\x01\x04.+([a-c]\x02[\x01-\x04].?.?.?.?\x02\x01.?\x02\x01.?\x30|\xa4\x06.+\x40\x04.?.?.?.?\x02\x01.?\x02\x01.?\x43)/
+/\x05[\x01-\x08]*\x05[\x01-\x08]?.*\x05[\x01-\x03][\x01\x03].*\x05[\x01-\x08]?[\x01\x03]/
+/^notify[\x09-\x0d ]\*[\x09-\x0d ]http\/1\.1[\x09-\x0d -~]*ssdp:(alive|byebye)|^m-search[\x09-\x0d ]\*[\x09-\x0d ]http\/1\.1[\x09-\x0d -~]*ssdp:discover/
+/^ssh-[12]\.[0-9]/
+/^\xf4\xbe\x03.*teamspeak/
+/TOR1.*<identity>/
+/^rfb 00[1-9]\.00[0-9]\x0a$/
+/^[lb].?\x0b/

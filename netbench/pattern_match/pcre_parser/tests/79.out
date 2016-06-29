@@ -1,0 +1,52 @@
+lex	: modif_front: SLASH
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_front <<< pcre_delim
+lex	: LPAR
+yacc	: startCapturing <<< LPAR
+lex	: OPTION
+yacc	: optionStart <<< OPTION
+lex	: DASH
+yacc	: dash <<< DASH
+lex	: MODIF_CASELESS
+yacc	: option_unset_unit <<< MODIF_CASELESS
+lex	: RBRA
+yacc	: option_unset <<< option_unset_unit
+yacc	: option_unset_group <<< dash option_unset
+yacc	: optionEnd <<< RBRA
+yacc	: option <<< optionStart-option_unset_group|optionEnd
+yacc	: unit <<< option
+lex	: ASCII b
+yacc	: ext_unit <<< unit
+yacc	: element <<< ASCII b
+yacc	: unit <<< element
+lex	: OR
+yacc	: ext_unit <<< unit
+yacc	: exp <<< ext_unit
+yacc	: exp <<< ext_unit-exp
+yacc	: ext_exp <<< exp
+yacc	: rv <<< ext_exp
+yacc	: or <<< OR
+lex	: ASCII a
+yacc	: element <<< ASCII a
+yacc	: unit <<< element
+lex	: RPAR
+yacc	: ext_unit <<< unit
+yacc	: exp <<< ext_unit
+yacc	: ext_exp <<< exp
+yacc	: rv <<< ext_exp
+yacc	: rv <<< rv-or|rv
+yacc	: endCapturing <<< RPAR
+yacc	: capturing <<< startCapturing rv endCapturing
+yacc	: unit <<< capturing
+lex	: SLASH
+yacc	: ext_unit <<< unit
+yacc	: exp <<< ext_unit
+yacc	: ext_exp <<< exp
+yacc	: rv <<< ext_exp
+yacc	: inslash <<< rv
+yacc	: pattern <<< inslash
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_rear_unit <<< MODIF_CASELESS
+yacc	: modif_rear_ext <<< modif_rear_unit
+yacc	: modif_rear <<< pcre_delim-modif_rear_ext
+yacc	: pcre <<< modif_front pattern modif_rear

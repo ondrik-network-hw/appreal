@@ -1,0 +1,7 @@
+Accelerated Network Technologies @ FIT - NetBench
+=================================================
+
+This directory contains two basic experiments on pattern match algorithms. Those
+experiments are comparison of NFA and DFA based algorithms.
+
+NOTE: Those experiments can run for a long time.

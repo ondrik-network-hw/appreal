@@ -1,0 +1,102 @@
+lex	: modif_front: SLASH
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_front <<< pcre_delim
+lex	: NP_ALNUM
+yacc	: posix_class_neg <<< NP_ALNUM
+yacc	: posix_class <<< posix_class_neg
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: NP_ALPHA
+yacc	: ext_unit <<< unit
+yacc	: posix_class_neg <<< NP_ALPHA
+yacc	: posix_class <<< posix_class_neg
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: NP_ASCII
+yacc	: ext_unit <<< unit
+yacc	: posix_class_neg <<< NP_ASCII
+yacc	: posix_class <<< posix_class_neg
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: NP_BLANK
+yacc	: ext_unit <<< unit
+yacc	: posix_class_neg <<< NP_BLANK
+yacc	: posix_class <<< posix_class_neg
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: NP_CNTRL
+yacc	: ext_unit <<< unit
+yacc	: posix_class_neg <<< NP_CNTRL
+yacc	: posix_class <<< posix_class_neg
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: NP_GRAPH
+yacc	: ext_unit <<< unit
+yacc	: posix_class_neg <<< NP_GRAPH
+yacc	: posix_class <<< posix_class_neg
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: NP_LOWER
+yacc	: ext_unit <<< unit
+yacc	: posix_class_neg <<< NP_LOWER
+yacc	: posix_class <<< posix_class_neg
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: NP_PRINT
+yacc	: ext_unit <<< unit
+yacc	: posix_class_neg <<< NP_PRINT
+yacc	: posix_class <<< posix_class_neg
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: NP_PUNCT
+yacc	: ext_unit <<< unit
+yacc	: posix_class_neg <<< NP_PUNCT
+yacc	: posix_class <<< posix_class_neg
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: NP_SPACE
+yacc	: ext_unit <<< unit
+yacc	: posix_class_neg <<< NP_SPACE
+yacc	: posix_class <<< posix_class_neg
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: NP_UPPER
+yacc	: ext_unit <<< unit
+yacc	: posix_class_neg <<< NP_UPPER
+yacc	: posix_class <<< posix_class_neg
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: NP_WORD
+yacc	: ext_unit <<< unit
+yacc	: posix_class_neg <<< NP_WORD
+yacc	: posix_class <<< posix_class_neg
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: NP_XDIGIT
+yacc	: ext_unit <<< unit
+yacc	: posix_class_neg <<< NP_XDIGIT
+yacc	: posix_class <<< posix_class_neg
+yacc	: class <<< posix_class
+yacc	: unit <<< class
+lex	: SLASH
+yacc	: ext_unit <<< unit
+yacc	: exp <<< ext_unit
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: ext_exp <<< exp
+yacc	: rv <<< ext_exp
+yacc	: inslash <<< rv
+yacc	: pattern <<< inslash
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_rear <<< pcre_delim
+yacc	: pcre <<< modif_front pattern modif_rear

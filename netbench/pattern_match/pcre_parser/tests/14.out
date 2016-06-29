@@ -1,0 +1,58 @@
+lex	: modif_front: SLASH
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_front <<< pcre_delim
+lex	: ASCII p
+yacc	: element <<< ASCII p
+yacc	: unit <<< element
+lex	: ASCII +
+yacc	: ext_unit <<< unit
+yacc	: element <<< ASCII +
+yacc	: unit <<< element
+lex	: ZEROMORE
+yacc	: quantifier <<< ZEROMORE
+lex	: ASCII c
+yacc	: quantify <<< quantifier
+yacc	: quantify_unit <<< unit quantify
+yacc	: ext_unit <<< quantify_unit
+yacc	: element <<< ASCII c
+yacc	: unit <<< element
+lex	: ASCII *
+yacc	: ext_unit <<< unit
+yacc	: element <<< ASCII *
+yacc	: unit <<< element
+lex	: ONEMORE
+yacc	: quantifier <<< ONEMORE
+lex	: ASCII r
+yacc	: quantify <<< quantifier
+yacc	: quantify_unit <<< unit quantify
+yacc	: ext_unit <<< quantify_unit
+yacc	: element <<< ASCII r
+yacc	: unit <<< element
+lex	: ASCII ?
+yacc	: ext_unit <<< unit
+yacc	: element <<< ASCII ?
+yacc	: unit <<< element
+lex	: ZEROONE
+yacc	: quantifier <<< ZEROONE
+lex	: ASCII e
+yacc	: quantify <<< quantifier
+yacc	: quantify_unit <<< unit quantify
+yacc	: ext_unit <<< quantify_unit
+yacc	: element <<< ASCII e
+yacc	: unit <<< element
+lex	: SLASH
+yacc	: ext_unit <<< unit
+yacc	: exp <<< ext_unit
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: ext_exp <<< exp
+yacc	: rv <<< ext_exp
+yacc	: inslash <<< rv
+yacc	: pattern <<< inslash
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_rear <<< pcre_delim
+yacc	: pcre <<< modif_front pattern modif_rear

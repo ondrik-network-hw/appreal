@@ -1,0 +1,17 @@
+/--backup-dir\s+\x2e\x2e\x2f/
+/^(CLIENT|MACHINE)_INFO/Ri
+/^Directory/smiR
+/^Location\:[^\n]{128}/smi
+/^Location\s*\x3a\s*\w+\x3a\/\/([^\n]*\x3a)?[^\n]{128}/smi
+/(mailto|telnet|news|nntp|snews)\x3A[^\n]*[\x25\x22]\x2Ebat/i
+/(mailto|telnet|news|nntp|snews)\x3A[^\n]*[\x25\x22]\x2Ecmd/i
+/(mailto|telnet|news|nntp|snews)\x3A[^\n]*[\x25\x22]\x2Ecom/i
+/(mailto|telnet|news|nntp|snews)\x3A[^\n]*[\x25\x22]\x2Eexe/i
+/^Max-dotdot[\s\r\n]*\d{3,}/msi
+/^(NT|CallBack|SID|TimeOut)\s*\x3a\s*[^\n]{512}/Rsmi
+/SELECT\s*(TO_(DATE|CHAR)|(VARCHAR|TIMESTAMP)_FORMAT)\s*\('[^']*'\s*,\s*''\)/smi
+/^URL\x3b\w+\x3amailto\x3a[^\n]*%[^\n]*\.(cmd|bat)/smi
+/^Username\:[^\n]{100}/smi
+/Visio \x28TM\x29 Drawing\r\n\x00{4}([^\x00]|\x00[^\x00]|\x00\x00[^\x00]|\x00\x00\x00[^\x01-t\x0b])/smi
+/\x3d\x00\x12\x00..........(.[\x80-t]|...[\x80-t])/smiR
+/\xff{8}\x09\x08[\x08\x10]\x00\x00[\x05\x06]\x00\x01/sm

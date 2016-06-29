@@ -1,0 +1,3 @@
+/DATE_FORMAT\x28\s*(\x22[^\x22]+\x25[^\x22]*\x22|\x27[^\x27]+\x25[^\x27]*\x27)/smi
+/\x03create\s+(aggregate\s+)*function/smi
+/\x03create\s+(aggregate\s+)*function\s+\S{50}/smi

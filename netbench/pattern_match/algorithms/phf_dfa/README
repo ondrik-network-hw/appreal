@@ -1,0 +1,7 @@
+This is the implementation of the DSD paper:
+
+Kaštil Jan, Kořenek Jan, Lengál Ondřej: Methodology for Fast Pattern Matching by Deterministic Finite Automaton with Perfect Hashing, In: 12th EUROMICRO Conference on Digital System Design DSD 2009, Patras, GR, IEEE CS, 2009, p. 823-289, ISBN 978-0-7695-3782-5
+
+Several improvements are also implemented.
+
+

@@ -1,0 +1,41 @@
+Source files
+------------
+debug.hpp		debug macro
+Makefile		Makefile of project
+parse.c			main parse function: parse input string pcre
+parser.c		main program of parser, uses stdin for input
+pcre.l			lexikální analyzátor
+pcre.y			gramatika (bez ladících výpisů a volání funkcí)
+dodelej.sh		skript pro doplnění ladících výpisů do gramatiky a vygenerování interface.h a modulu painter
+
+preambles/*		úvodní části zdrojových souborů modulů
+
+pcre.gen.y		gramatika doplněná o volání funkcí a ladící výpisy
+painter.cpp		modul pro vykreslení derivačního stromu
+painter.hpp
+interface.h		hlavičkový soubor se všemi definicemi funkcí
+interface.c		soubor s prázdným voláním všech funkcí
+
+Generated files
+---------------
+pcre.tab.h
+pcre.tab.c
+pcre.yy.c
+
+Binary files
+--------------
+parser
+painter
+tester
+
+Test files
+----------
+tests/test.sh		run necessery tests
+tests/tests_ok.sh	run basic (parsed/not-parsed) test for each pattern on single line in inputs/base.txt
+					option param -i for specify test file
+tests/tests_ex.sh	run extended test (compare expected output from file with current output from program)
+make_outs.sh		make *.out files for each *.pattern file
+
+IMPLEMENTED		describes what is already implemented in grammar
+README
+FILES

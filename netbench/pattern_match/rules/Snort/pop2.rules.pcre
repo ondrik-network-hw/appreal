@@ -1,0 +1,2 @@
+/^FOLD\s[^\n]{256}/smi
+/^FOLD\s+\//smi

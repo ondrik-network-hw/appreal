@@ -1,0 +1,71 @@
+lex	: modif_front: SLASH
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_front <<< pcre_delim
+lex	: DECDIGIT
+yacc	: slashcharclass <<< DECDIGIT
+yacc	: class <<< slashcharclass
+yacc	: unit <<< class
+lex	: NDECDIGIT
+yacc	: ext_unit <<< unit
+yacc	: slashcharclass <<< NDECDIGIT
+yacc	: class <<< slashcharclass
+yacc	: unit <<< class
+lex	: HWHITESPACE
+yacc	: ext_unit <<< unit
+yacc	: slashcharclass <<< HWHITESPACE
+yacc	: class <<< slashcharclass
+yacc	: unit <<< class
+lex	: NHWHITESPACE
+yacc	: ext_unit <<< unit
+yacc	: slashcharclass <<< NHWHITESPACE
+yacc	: class <<< slashcharclass
+yacc	: unit <<< class
+lex	: WHITESPACE
+yacc	: ext_unit <<< unit
+yacc	: slashcharclass <<< WHITESPACE
+yacc	: class <<< slashcharclass
+yacc	: unit <<< class
+lex	: NWHITESPACE
+yacc	: ext_unit <<< unit
+yacc	: slashcharclass <<< NWHITESPACE
+yacc	: class <<< slashcharclass
+yacc	: unit <<< class
+lex	: VWHITESPACE
+yacc	: ext_unit <<< unit
+yacc	: slashcharclass <<< VWHITESPACE
+yacc	: class <<< slashcharclass
+yacc	: unit <<< class
+lex	: NVWHITESPACE
+yacc	: ext_unit <<< unit
+yacc	: slashcharclass <<< NVWHITESPACE
+yacc	: class <<< slashcharclass
+yacc	: unit <<< class
+lex	: WORDCHAR
+yacc	: ext_unit <<< unit
+yacc	: slashcharclass <<< WORDCHAR
+yacc	: class <<< slashcharclass
+yacc	: unit <<< class
+lex	: NWORDCHAR
+yacc	: ext_unit <<< unit
+yacc	: slashcharclass <<< NWORDCHAR
+yacc	: class <<< slashcharclass
+yacc	: unit <<< class
+lex	: SLASH
+yacc	: ext_unit <<< unit
+yacc	: exp <<< ext_unit
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: exp <<< ext_unit-exp
+yacc	: ext_exp <<< exp
+yacc	: rv <<< ext_exp
+yacc	: inslash <<< rv
+yacc	: pattern <<< inslash
+yacc	: pcre_delim <<< SLASH
+yacc	: modif_rear <<< pcre_delim
+yacc	: pcre <<< modif_front pattern modif_rear

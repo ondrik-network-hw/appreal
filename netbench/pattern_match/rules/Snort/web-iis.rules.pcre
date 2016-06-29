@@ -1,0 +1,12 @@
+/^Authorization|3A|\s*Basic\s+TERBUF9Bbm9ueW1vdXM6TGRhcFBhc3N3b3JkXzE=/smi
+/.bat\x22.*\x26.*/smi
+/CiWebHitsFile=\/?([^\r\n\x3b\&]*\.\.\/)?/i
+/.cmd\x22.*\x26.*/smi
+/contenttype=[^\r\n\x3b\x38]{100}/smiU
+/default.idq[^\r\n]*ciRestriction[^\r\n]*script/smi
+/^POST\s/smi
+/\s{230,}.htr/U
+/\/_vti_bin\/\.dll\/(%(0[1-9]|1[0-f])|%3f|\x22|\x2a|\x3a|<|>)[\\\/]~[0-9]/Ui
+/w3who.dll\x3F[^\r\n]{519}/i
+/\x2fWebID\x2fIISWebAgentIF.dll[^\n\x26\x3f]*\x3fRedirect\x3furl=[^\n\x26\x3f]{1024}/smi
+/\x3c\x21\x2d\x2d\x23include\s+file[^(\x2d\x2d\x3e)]{250,}/

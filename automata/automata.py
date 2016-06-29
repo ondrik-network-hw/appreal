@@ -2,12 +2,12 @@
 
 # Uses FAdo (python2):
 #
-#   http://pythonhosted.org/FAdo/
+#   doc: http://pythonhosted.org/FAdo/
+#   git: https://github.com/Glavin001/FAdo
 #
 # To install:
 #
 # $ pip install FAdo
-#
 
 from FAdo.fa import *
 

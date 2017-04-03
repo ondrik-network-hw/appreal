@@ -6,6 +6,18 @@ __pycache__/
 # C extensions
 *.so
 
+reductions/backup/
+reductions/pcap/
+reductions/subautomata/
+reductions/learning/treba
+
+regexps/
+netbench/
+automata/
+
+reductions/experiments
+reductions/logs
+
 # Distribution / packaging
 .Python
 env/

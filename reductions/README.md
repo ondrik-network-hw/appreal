@@ -61,3 +61,6 @@ The reduction is provided by the script *reduction.py*.
 ```
 $ ./reduction.py -p pa.fa -a nfa.fa -o out.fa --type=sl --mode=eps --restriction=0.5
 ```
+
+## Contributors
+- Vojtěch Havlena <xhavle03[at]stud.fit.vutbr.cz>

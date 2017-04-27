@@ -362,7 +362,7 @@ def main():
     else:
         red_aut, err = pruning_reduction(pa, input_nfa, params.mode, params.restriction)
 
-    print "The distance upperbound is {0}".format(err)
+    print "The distance upperbound is {0}".format(min(err, 1.0))
 
     if red_aut is None:
         sys.stderr.write("Error during NFA reduction.\n")

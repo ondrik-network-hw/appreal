@@ -76,7 +76,7 @@ class PruningReduction(core_reduction.CoreReduction):
                 ret.add(state)
         return ret
 
-    def value_function(self, back_prob, states):
+    def value_function(self, back_prob, states_label, states):
         """Value function (the backward probabilities sum of states in the set states).
 
         Return: Float
@@ -85,7 +85,10 @@ class PruningReduction(core_reduction.CoreReduction):
         states -- The set of states (input of value function c)
         """
         ret = 0.0
+        total_set = set([])
         for state in list(states):
+            total_set = total_set.union(states_label[state])
+        for state in list(total_set):
             ret += back_prob[state]
         return ret
 
@@ -104,8 +107,8 @@ class PruningReduction(core_reduction.CoreReduction):
         weight2 = self.weight_function(states_label, set2)
         if weight1 > weight2:
             return True
-        elif (weight1 == weight2) and (self.value_function(back_prob, set1)\
-            <= self.value_function(back_prob, set2)):
+        elif (weight1 == weight2) and (self.value_function(back_prob, states_label, set1)\
+            <= self.value_function(back_prob, states_label, set2)):
             return True
         else:
             return False
@@ -120,8 +123,8 @@ class PruningReduction(core_reduction.CoreReduction):
         states_label -- alpha label of each state (Dictionary: State -> set([State]))
         back_prob -- Backward probability of each state (Dictionary: State -> Float)
         """
-        val1 = self.value_function(back_prob, set1)
-        val2 = self.value_function(back_prob, set2)
+        val1 = self.value_function(back_prob, states_label, set1)
+        val2 = self.value_function(back_prob, states_label, set2)
         if val1 < val2:
             return True
         elif (val1 == val2) and self.weight_function(states_label, set1) \
@@ -147,6 +150,8 @@ class PruningReduction(core_reduction.CoreReduction):
         W = (1-k)*len(nfa_states)
         final_subsets = aux.list_powerset(nfa_finals)
         states_label = self.get_states_label()
+
+        print back_prob
 
         for M in final_subsets:
             if (self.weight_function(states_label, M) <= W) \
@@ -209,7 +214,7 @@ class PruningReduction(core_reduction.CoreReduction):
         states_label = self.get_states_label()
 
         for M in final_subsets:
-            if (self.value_function(back_prob, M) <= W) \
+            if (self.value_function(back_prob, states_label, M) <= W) \
                 and (self.compare_sets(M, V, states_label, back_prob)):
                 V = copy.deepcopy(M)
 
@@ -238,7 +243,7 @@ class PruningReduction(core_reduction.CoreReduction):
         for aut in sub_automata:
             sub_finals = set(aut.get_finals())
             val.append(self.weight_function(states_label, sub_finals))
-            constraint.append(self.value_function(back_prob, sub_finals))
+            constraint.append(self.value_function(back_prob, states_label, sub_finals))
 
         sub_vars = range(0,len(sub_automata))
         variables = pulp.LpVariable.dicts('sub', sub_vars, lowBound = 0, upBound = 1,\
@@ -288,7 +293,7 @@ class PruningReduction(core_reduction.CoreReduction):
         for aut in sub_automata:
             sub_finals = set(aut.get_finals())
             val.append(self.weight_function(states_label, sub_finals))
-            constraint.append(self.value_function(back_prob, sub_finals))
+            constraint.append(self.value_function(back_prob, states_label, sub_finals))
 
         sub_vars = range(0,len(sub_automata))
         variables = pulp.LpVariable.dicts('sub', sub_vars, lowBound = 0, upBound = 1,\
@@ -356,7 +361,7 @@ class PruningReduction(core_reduction.CoreReduction):
         for aut in sub_automata:
             sub_finals = set(aut.get_finals())
             constraint.append(self.weight_function(states_label, sub_finals))
-            val.append(self.value_function(back_prob, sub_finals))
+            val.append(self.value_function(back_prob, states_label, sub_finals))
 
         sub_vars = range(0,len(sub_automata))
         variables = pulp.LpVariable.dicts('sub', sub_vars, lowBound = 0, upBound = 1,\

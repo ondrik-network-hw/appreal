@@ -89,12 +89,12 @@ class b_Automaton(b_ptrn_match):
             methods preserves relation between final states and coresponding  \
             regular expresions (languages). If set to False, methods works    \
             exactly by their definitions - final states are joined if possible.
-            
+
             :param value: New value of the _multilanguage attribute.
             :type value: boolean
         """
         self._multilanguage = value
-    
+
     def get_multilanguage(self):
         """
             Returns value of _multilanguage attribute. Determinates behavior  \
@@ -102,7 +102,7 @@ class b_Automaton(b_ptrn_match):
             methods preserves relation between final states and coresponding  \
             regular expresions (languages). If set to False, methods works    \
             exactly by their definitions - final states are joined if possible.
-            
+
             :returns: Value of the _multilanguage attribute.
             :rtype: boolean
         """
@@ -161,7 +161,7 @@ class b_Automaton(b_ptrn_match):
             if self._automaton == None:
                 if nfa_parser_class.next_line() == False:
                     break
-        
+
         # Check if we got the automaton
         if self._automaton == None:
             return False
@@ -195,7 +195,7 @@ class b_Automaton(b_ptrn_match):
 
             Warning: If safe=False is used, the result should be used as       \
             read-only (Only reference on self._automaton object is returned).  \
-            Otherwise it can cause undefined behavior!                         
+            Otherwise it can cause undefined behavior!
         """
         if safe:
             return copy.deepcopy(self._automaton)
@@ -255,7 +255,7 @@ class b_Automaton(b_ptrn_match):
         for transition in nfa.transitions:
             self._automaton.transitions.add((max_state_num + transition[0], transform_alphabet[transition[1]], max_state_num + transition[2]))
 
-        
+
         # Create new start state
         if isinstance(self._automaton.start, set) or isinstance(self._automaton.start, frozenset):
             old_start_id = self._automaton.start
@@ -274,7 +274,7 @@ class b_Automaton(b_ptrn_match):
         # Add epsilon transition from new start state to old start state of current automaton.
         for oss in old_start_id:
             self._automaton.transitions.add((max_id_s, -1, oss))
-        
+
         # If reg. exp. numbers should be modified, find max reg. exp. number.
         if modify_reg_exp_num == True:
             max_rnum = -1
@@ -715,9 +715,9 @@ class b_Automaton(b_ptrn_match):
     def create_char_classes(self):
         """
             Creates char classes, if they can be created. Replaced transitions are removed. Unused symbols are removed after creation of char classes.
-            
+
             :Flags: Sets Alphabet collision free flag to False
-            
+
             This method sets _compute to False, and get_compute() will return False until compute() is called.
         """
 
@@ -876,7 +876,7 @@ class b_Automaton(b_ptrn_match):
         for symbol in removeSymbolsDict.keys():
             if removeSymbolsDict[symbol] == 0:
                 del self._automaton.alphabet[symbol]
-                
+
         self._compute = False
         #self._fix_redundant_alphabet()
 
@@ -895,7 +895,7 @@ class b_Automaton(b_ptrn_match):
         # Automaton doesn't have any transition
         if len(self._automaton.alphabet.keys()) == 0:
             return
-        
+
         # Number of rows in transition table.
         rows = max(self._automaton.states.keys()) + 1
         # Number of columns in transition table.
@@ -1020,7 +1020,7 @@ class b_Automaton(b_ptrn_match):
         # Automatom doesn't have any state = automaton is empty
         if self._automaton.is_empty():
             return
-        
+
         self._automaton.Flags["Deterministic"] = False
 
         mapper = dict()
@@ -1080,7 +1080,7 @@ class b_Automaton(b_ptrn_match):
                         if inner_state in self._automaton.final:
                             # add new end state and add all chars char class to second position
                             # if state has outgoing transition continue follow them
-                            
+
                             # create local copy of complete alphabet. This copy is created for all uncovered strides
                             local_chars = list()
                             for i in range(0, add):
@@ -1363,7 +1363,7 @@ class b_Automaton(b_ptrn_match):
 
     def _fix_alphabet_indexes(self):
         """
-            Re-sort the alphabet and make symbols id's continual. Maximum index will be len(alphabet) - 1. 
+            Re-sort the alphabet and make symbols id's continual. Maximum index will be len(alphabet) - 1.
         """
         # sort transitions by symbol
         tSortSym = dict()
@@ -1406,7 +1406,7 @@ class b_Automaton(b_ptrn_match):
 
         if self.has_flag("Deterministic") and self.get_flag("Deterministic") == True:
             self.set_flag("Deterministic", False)
-        
+
         self._fix_alphabet_indexes()
 
         newSymbolAdded = True
@@ -1475,7 +1475,7 @@ class b_Automaton(b_ptrn_match):
                    del self._automaton.alphabet[symbolID]
             # re-sort alphabet
             self._fix_alphabet_indexes()
-        
+
         if len(self._automaton.alphabet) > 0:
             self.set_flag("Alphabet collision free", True)
         self._compute = False
@@ -1491,7 +1491,7 @@ class b_Automaton(b_ptrn_match):
 
         if self.has_flag("Deterministic") and self.get_flag("Deterministic") == True:
             self.set_flag("Deterministic", False)
-        
+
         self._fix_alphabet_indexes()
 
         newSymbolAdded = True
@@ -1564,7 +1564,7 @@ class b_Automaton(b_ptrn_match):
                    del self._automaton.alphabet[symbolID]
             # re-sort alphabet
             self._fix_alphabet_indexes()
-        
+
         if len(self._automaton.alphabet) > 0:
             self.set_flag("Alphabet collision free", True)
         self._compute = False
@@ -1580,16 +1580,16 @@ class b_Automaton(b_ptrn_match):
         """
             Report consumed memory in bytes. Optimal mapping algorithm is used \
             (with oracle).
-            
+
             :returns: Returns number of bytes.
             :rtype: int
         """
-    
+
     def report_memory_naive(self):
         """
             Report consumed memory in bytes. Naive mapping algorithm is used \
             (2D array).
-            
+
             :returns: Returns number of bytes.
             :rtype: int
         """
@@ -1604,21 +1604,21 @@ class b_Automaton(b_ptrn_match):
                 removeable_transitions.add(transition)
         for transition in removeable_transitions:
             self._automaton.transitions.discard(transition)
-        
+
     def thompson2glushkov(self):
         """
             Transforms Thompson automaton to Glushkov automaton.
             Steps:
                 1) Input automaton with eps transitions
                 2) Convert thompson eps-NFA to glushkov NFA
-        """    
+        """
         # Create empty automaton
         fsm_n = b_Automaton()
         fsm_n.create_from_nfa_data(self.get_automaton(True),False)
-        
+
         # Number of epsilon transitions in automaton
         eps_count = 0
-        
+
         # Create forward and backward mapping of transitions
         mapper = dict()
         reverse_mapper = dict()
@@ -1636,7 +1636,7 @@ class b_Automaton(b_ptrn_match):
                 eps_count += 1
         old_eps_count = 0
         fsm_n._remove_self_epsilon_loops()
-        
+
         # Main loop oparate on automaton until no epsilon transition is pressent
         while eps_count != old_eps_count:
             queue = deque()
@@ -1786,7 +1786,7 @@ class b_Automaton(b_ptrn_match):
     def is_glushkov(self, reverse = False):
         """
             Check if automaton is glushkov (position) automaton.
-            
+
             :param reverse: If True, check if automaton is reverse glushkov (position) automaton. Otherwise check if automaton is glushkov (position) automaton.
             :type reverse: boolean
             :returns: Returns status of the check.
@@ -1847,7 +1847,7 @@ class b_Automaton(b_ptrn_match):
             new_transitions.add((transition[0], translation[transition[1]], transition[2]))
         self._automaton.transitions = new_transitions
         print "Size of alphabet after " + str(len(self._automaton.alphabet))
-        
+
     def _remove_unused_symbols(self):
         """
             Remove unused symbols from alphabet.
@@ -1864,7 +1864,7 @@ class b_Automaton(b_ptrn_match):
 
     def remove_counting_constraints(self, limit = 18):
         """
-            Remove counting constraints from automaton. Transitions with counting 
+            Remove counting constraints from automaton. Transitions with counting
             constraint are replaced by subautomaton with same function.
         """
         for transition in self._automaton.alphabet:
@@ -1875,7 +1875,7 @@ class b_Automaton(b_ptrn_match):
         removeable_transitions = set()
         new_transitions = set()
         new_symbols = dict()
-        
+
         index = max(self._automaton.alphabet) + 1
         for symbol in self._automaton.alphabet:
             if self._automaton.alphabet[symbol].ctype == b_symbol.io_mapper["b_Sym_cnt_constr"]:
@@ -1891,7 +1891,7 @@ class b_Automaton(b_ptrn_match):
                 replace_symbols[symbol] = index
                 index += 1
         index = max(self._automaton.states) + 1
-        
+
         clean = False
         while clean == False:
             clean = True
@@ -1978,7 +1978,7 @@ class b_Automaton(b_ptrn_match):
                         self._automaton.transitions.add((index - 1, replace_symbols[transition[1]], transition[2]))
                     self._automaton.transitions.remove(transition)
                     #clean = False
-            print len(removeable_transitions), " x", len(new_transitions) 
+            print len(removeable_transitions), " x", len(new_transitions)
             #self._automaton.transitions -= removeable_transitions
             #self._automaton.transitions |= new_transitions
         #for sym in cnt_symbols:
@@ -1986,11 +1986,53 @@ class b_Automaton(b_ptrn_match):
         for sym in new_symbols:
             self._automaton.alphabet[sym] = new_symbols[sym]
 
+    def save_to_FA_format(self, file_name):
+        fw = open(file_name, 'w')
+
+        if isinstance(self._automaton.start, set):
+            raise pattern_exceptions.general_unsupported_type(self.save_to_timbuk.__name__, self._automaton.alphabet[symbol].__class__.__name__, self._automaton.alphabet[symbol], "Method supports only instances of automaton with single start state.")
+        else:
+            fw.write(self._automaton.states[self._automaton.start].get_text() +"\n")
+
+        line = ":"
+        symbols = []
+        for symbol in self._automaton.alphabet.keys():
+            if self._automaton.alphabet[symbol].get_type() == b_symbol.io_mapper["b_Sym_char"]:
+                symbols.append(ord(self._automaton.alphabet[symbol].char))
+                line += " {0}".format(hex(ord(self._automaton.alphabet[symbol].char)))
+            else:
+                raise pattern_exceptions.general_unsupported_type(self.save_to_timbuk.__name__, self._automaton.alphabet[symbol].__class__.__name__, self._automaton.alphabet[symbol], "Method supports only instances of class b_Sym_char in simple mode.")
+
+
+
+        symbols.sort()
+        # print "Symbols count: ", len(symbols)
+        # for i in range(0,256):
+        #     if i < len(symbols) and symbols[i] != i:
+        #         print "Warning: missing symbols "
+        #         break
+        # print "Adding symbols ..."
+        for i in range(0,256):
+            if i not in symbols:
+                line += " {0}".format(hex(i))
+
+        fw.write(line + "\n")
+
+
+        for (fr, sym, to) in self._automaton.transitions:
+            fw.write("{0} {1} {2}\n".format(str(fr), str(to), hex(ord(self._automaton.alphabet[sym].char))))
+        for state in self._automaton.final:
+            fw.write(self._automaton.states[state].get_text() + "\n")
+
+        fw.close()
+
+
+
     def save_to_timbuk(self, file_name, simple = True):
         """
             Save automaton in timbuk style.
-            
-            <file>            : 'Ops' <label_list> <automaton> <automaton> ... 
+
+            <file>            : 'Ops' <label_list> <automaton> <automaton> ...
 
             <label_list>      : <label_decl> <label_decl> ... // a list of label declarations
 
@@ -2007,10 +2049,10 @@ class b_Automaton(b_ptrn_match):
             <transition>      : <label> '(' <state> ',' <state> ',' ... ')' '->' <state> // a transition
 
             <label>           : string // the name of a label
-            
+
             :param file_name: File name
             :type file_name: string
-            
+
             :param simple: Use simple mode. In simple mode only automata with  \
                            character symbols are supported and the symbols are \
                            encoded as trasition labels in format 'sXX', where  \
@@ -2021,7 +2063,7 @@ class b_Automaton(b_ptrn_match):
             :type simple: boolean
         """
         fw = open(file_name, 'w')
-               
+
         line = "Ops"
         if simple == True:
             for symbol in self._automaton.alphabet.keys():

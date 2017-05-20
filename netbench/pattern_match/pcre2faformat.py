@@ -51,7 +51,7 @@ def usage():
     print "Parameters:"
     print "-h | --help                   - show this help"
     print "-i <file> | --input <file>    - file with set of PCRE expressions one per line"
-    print "-o <file> | --output <file>   - file for resulting automaton encoded in Timbuk format"
+    print "-o <file> | --output <file>   - file for resulting automaton encoded in FA format"
     print "-d <file> | --display <file>  - save image of the automaton into this file, graphviz/dot format is used."
     print "-s                            - Use simple mode. In simple mode only automata with "
     print "                                character symbols are supported and the symbols are "

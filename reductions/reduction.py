@@ -4,7 +4,20 @@
 Tool for approximate reductions of finite automata used in network traffic
 monitoring.
 
-Author: Vojtech Havlena, <xhavle03@stud.fit.vutbr.cz>
+Copyright (C) 2017  Vojtech Havlena, <xhavle03@stud.fit.vutbr.cz>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License.
+If not, see <http://www.gnu.org/licenses/>.
 """
 
 import sys
@@ -32,6 +45,7 @@ FILESELFLOOPS = "sefloops"
 DIVIDE = False
 RELATIVEEPS = True
 INTEGERPROGRAMMING = False
+REDUCTION_MODIF = False
 
 HELP = "Program for reducing NFAs according to a PA.\n"\
         "-p aut -- Input probabilistic automaton in Treba format.\n"\
@@ -171,11 +185,11 @@ def compute_weight_all(reduction):
     if reduction.get_nfa().is_unambiguous():
         print("Input NFA is unambiguous, computing weights by a product.")
         back_prob = reduction.get_states_weight_product(matrix_wfa.ClosureMode.inverse)
-        print back_prob
+        #print back_prob
     else:
         print("Input NFA is not unambiguous, computing weights by subautomata.")
         back_prob = reduction.get_states_weight_subautomaton(matrix_wfa.ClosureMode.inverse, True)
-        print back_prob
+        #print back_prob
     return back_prob
 
 def self_loop_reduction(pa, input_nfa, mode, restriction):
@@ -203,7 +217,7 @@ def self_loop_reduction(pa, input_nfa, mode, restriction):
         for state, weight in back_prob_rev.iteritems():
             back_prob[rename_dict[state]] = weight
 
-        print back_prob
+        #print back_prob
     else:
         if DIVIDE:
             back_prob = compute_weight_sub(reduction)
@@ -214,7 +228,10 @@ def self_loop_reduction(pa, input_nfa, mode, restriction):
         reduced_aut = reduction.eps_reduction(back_prob, restriction)
         reduced_aut.__class__ = nfa.NFA
     elif mode == "k":
-        reduced_aut = reduction.k_reduction(back_prob, restriction)
+        if REDUCTION_MODIF:
+            reduced_aut = reduction.k_reduction_modif(back_prob, restriction)
+        else:
+            reduced_aut = reduction.k_reduction(back_prob, restriction)
         reduced_aut.__class__ = nfa.NFA
     else:
         reduced_aut = None
@@ -255,10 +272,10 @@ def compute_prob_all(reduction):
     reduction -- Instance of class for the pruning reduction.
     """
     if reduction.get_nfa().is_unambiguous():
-        print("Input NFA is unambiguous, computing weights by a product.")
+        print("Input NFA is unambiguous, computing probabilities by a product.")
         back_prob = reduction.get_finals_prob_product(matrix_wfa.ClosureMode.inverse)
     else:
-        print("Input NFA is not unambiguous, computing weights by subautomata.")
+        print("Input NFA is not unambiguous, computing probabilities by subautomata.")
         back_prob = reduction.get_finals_prob_subautomaton(matrix_wfa.ClosureMode.inverse, True)
     return back_prob
 
@@ -300,9 +317,15 @@ def pruning_reduction(pa, input_nfa, mode, restriction):
         if INTEGERPROGRAMMING:
             if subautomata is None:
                 subautomata = reduction.get_nfa().get_branch_subautomata()
-            reduced_aut = reduction.k_reduction_lp_modif(back_prob, subautomata, restriction)
+            if REDUCTION_MODIF:
+                reduced_aut = reduction.k_reduction_lp_modif(back_prob, subautomata, restriction)
+            else:
+                reduced_aut = reduction.k_reduction_lp(back_prob, subautomata, restriction)
         else:
-            reduced_aut = reduction.k_reduction(back_prob, restriction)
+            if REDUCTION_MODIF:
+                reduced_aut = reduction.k_reduction_modif(back_prob, restriction)
+            else:
+                reduced_aut = reduction.k_reduction(back_prob, restriction)
         reduced_aut.__class__ = nfa.NFA
     else:
         reduced_aut = None

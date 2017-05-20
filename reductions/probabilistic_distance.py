@@ -4,7 +4,20 @@
 Tool for approximate reductions of finite automata used in network traffic
 monitoring.
 
-Author: Vojtech Havlena, <xhavle03@stud.fit.vutbr.cz>
+Copyright (C) 2017  Vojtech Havlena, <xhavle03@stud.fit.vutbr.cz>
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License.
+If not, see <http://www.gnu.org/licenses/>.
 """
 
 import copy
@@ -125,14 +138,18 @@ def main():
     if input_nfa1.is_unambiguous():
         print("NFA 1 is unambiguous.")
     else:
-        print("NFA 1 is not unambiguous, performing unambiguation...")
+        print("NFA 1 is not unambiguous, performing disambiguation...")
         input_nfa1 = input_nfa1.get_unambiguous_nfa()
+        input_nfa1 = input_nfa1.get_trim_automaton()
+        input_nfa1.rename_states()
 
     if input_nfa2.is_unambiguous():
         print("NFA 2 is unambiguous.")
     else:
-        print("NFA 2 is not unambiguous, performing unambiguation...")
+        print("NFA 2 is not unambiguous, performing disambiguation...")
         input_nfa2 = input_nfa2.get_unambiguous_nfa()
+        input_nfa2 = input_nfa2.get_trim_automaton()
+        input_nfa2.rename_states()
 
     print("Computing product automaton 1...")
     wfa_p1 = pa.product(input_nfa1)
@@ -174,7 +191,7 @@ def main():
     res2 = wfa_p2.compute_language_probability(mode, params.iterations, False)
     res3 = wfa_p3.compute_language_probability(mode, params.iterations, False)
 
-    result = res1 + res2 - 2*res3
+    result = res1 + (res2 - 2*res3)
     print("The probabilistic distance of input automata is {0}.".format(result))
 
 

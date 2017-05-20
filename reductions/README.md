@@ -11,7 +11,8 @@ traffic and scripts for handling with larger automata, are included.
 The prototype tool is written in Python 2.7. Required Python libraries:
  - **NumPy** for linear algebra operations,
  - **PuLP** for solving (integer) linear programming problems,
- - **FAdo** for operations with finite automata.
+ - **FAdo** for operations with finite automata,
+ - **Scapy** for operations with PCAP files.
 
  For the learning PAs, the [Treba](https://code.google.com/archive/p/treba) tool
  is needed. The executable binary file of Treba must be placed in the folder

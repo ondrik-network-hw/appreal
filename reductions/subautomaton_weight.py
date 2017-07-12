@@ -36,6 +36,7 @@ SUBFILE = "sub"
 WEIGHTFILE = "weight"
 PROBFILE = "prob"
 CLOSUREMODE = matrix_wfa.ClosureMode.inverse
+APPROXIMATE = True
 
 HELP = "Program for dividing NFA into subautomata, and computing state weights and probabilities.\n"\
         "-p aut -- Input probabilistic automaton in Treba format.\n"\
@@ -127,7 +128,7 @@ def divide_automaton(input_nfa, directory):
     print("Original automaton states: {0}".format(len(input_nfa.get_states())))
     print("Subautomata states sum: {0}".format(substates))
 
-def compute_weights(pa, start, directory, iters=0):
+def compute_weights(pa, start, directory, approx=False, iters=0):
     """Compute weights for all subautomata stored in files. Results are
     stored in a file.
 
@@ -148,18 +149,22 @@ def compute_weights(pa, start, directory, iters=0):
             aut = parser_nfa.fa_to_nfa("{0}/{1}{2}".format(directory, SUBFILE, i))
             reduction = core_reduction.CoreReduction(pa, aut)
 
-            if reduction.get_nfa().is_unambiguous():
-                print("Unambiguous NFA {0}, computing product.".format(i))
-                back_prob = reduction.get_states_weight_product(CLOSUREMODE, iters)
+            if approx:
+                print "Computing approximate state labels of NFA {0}".format(i)
+                back_prob = reduction.get_states_weight_subautomaton_approximate(CLOSUREMODE, True, iters)
             else:
-                print("Not unambiguous NFA {0}, computing subautomata.".format(i))
-                back_prob = reduction.get_states_weight_subautomaton(CLOSUREMODE, True, iters)
+                if reduction.get_nfa().is_unambiguous():
+                    print("Unambiguous NFA {0}, computing product.".format(i))
+                    back_prob = reduction.get_states_weight_product(CLOSUREMODE, iters)
+                else:
+                    print("Not unambiguous NFA {0}, computing subautomata.".format(i))
+                    back_prob = reduction.get_states_weight_subautomaton(CLOSUREMODE, True, iters)
 
             with open("{0}/{1}{2}".format(directory, WEIGHTFILE, i), 'wb') as f:
                 pickle.dump(back_prob, f, pickle.HIGHEST_PROTOCOL)
-            for a,b in back_prob.iteritems():
-                print(a,b)
+
             i += 1
+            #return
         except IOError:
             return
 
@@ -238,13 +243,15 @@ def main():
         if params.mode == "divide":
             divide_automaton(input_nfa, params.directory)
         elif params.mode == "weight":
-            compute_weights(pa, params.start, params.directory, params.iterations)
+            compute_weights(pa, params.start, params.directory, APPROXIMATE, params.iterations)
         elif params.mode == "probability":
             compute_probabilities(pa, params.start, params.directory, params.iterations)
     except Exception as e:
         sys.stderr.write("{0}\n".format(e.message))
+        sys.stderr.flush()
         sys.exit(1)
 
 
 if __name__ == "__main__":
     main()
+    sys.stdout.flush()

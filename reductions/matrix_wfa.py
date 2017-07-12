@@ -30,11 +30,11 @@ class ClosureMode(object):
     iterations = 2 #Iterative matrix multiplication.
     hotelling_bodewig = 3
 
-class MatrixWFAException(Exception):
+class MatrixWFAOperationException(Exception):
     """Exception for invalid operations and errors during computing.
     """
     def __init__(self, msg):
-        super(MatrixWFAException, self).__init__()
+        super(MatrixWFAOperationException, self).__init__()
         self.msg = msg
 
     def __str__(self):
@@ -43,7 +43,7 @@ class MatrixWFAException(Exception):
 class MatrixWFA(core_wfa.CoreWFA):
     """Class for matrix operations with WFAs involving matrix operations.
     """
-    def __init__(self, transitions=None, finals=None, start=0, alphabet=None):
+    def __init__(self, transitions=None, finals=None, start=None, alphabet=None):
         super(MatrixWFA, self).__init__(transitions, finals, start, alphabet)
 
     def are_states_compatible(self):
@@ -53,11 +53,9 @@ class MatrixWFA(core_wfa.CoreWFA):
         Return: Bool
         """
         states = super(MatrixWFA, self).get_states()
-        initial = False
+
         for i in range(0, len(states)):
             found = False
-            if super(MatrixWFA, self).get_start() == i:
-                initial = True
             for state in states:
                 if state == i:
                     found = True
@@ -65,16 +63,7 @@ class MatrixWFA(core_wfa.CoreWFA):
             if not found:
                 return False
 
-        for state, _ in super(MatrixWFA, self).get_finals().iteritems():
-            found = False
-            for i in range(0, len(states)):
-                if state == i:
-                    found = True
-                    break
-            if not found:
-                return False
-
-        return initial
+        return True
 
     def get_transition_matrix(self):
         """Get a transition matrix corresponding to the WFA.
@@ -82,7 +71,7 @@ class MatrixWFA(core_wfa.CoreWFA):
         Return: Numpy.matrix (transition matrix)
         """
         if not self.are_states_compatible():
-            raise MatrixWFAException("States must be renamed to the set {0,...,n}")
+            raise MatrixWFAOperationException("States must be renamed to the set {0,...,n}")
 
         num_states = len(super(MatrixWFA, self).get_states())
         mtx = numpy.matrix(numpy.empty((num_states,num_states,)))
@@ -100,7 +89,7 @@ class MatrixWFA(core_wfa.CoreWFA):
         Return: Numpy.matrix (final vector).
         """
         if not self.are_states_compatible():
-            raise MatrixWFAException("States must be renamed to the set {0,...,n}")
+            raise MatrixWFAOperationException("States must be renamed to the set {0,...,n}")
 
         num_states = len(super(MatrixWFA, self).get_states())
         mtx = numpy.matrix(numpy.empty((num_states,)))
@@ -117,7 +106,7 @@ class MatrixWFA(core_wfa.CoreWFA):
         Return: Numpy.matrix (final states are set to one).
         """
         if not self.are_states_compatible():
-            raise MatrixWFAException("States must be renamed to the set {0,...,n}")
+            raise MatrixWFAOperationException("States must be renamed to the set {0,...,n}")
 
         num_states = len(super(MatrixWFA, self).get_states())
         mtx = numpy.matrix(numpy.empty((num_states,)))
@@ -136,12 +125,13 @@ class MatrixWFA(core_wfa.CoreWFA):
         Return: Numpy.matrix (of initial weights).
         """
         if not self.are_states_compatible():
-            raise MatrixWFAException("States must be renamed to the set {0,...,n}")
+            raise MatrixWFAOperationException("States must be renamed to the set {0,...,n}")
 
         num_states = len(super(MatrixWFA, self).get_states())
         mtx = numpy.matrix(numpy.empty((num_states,)))
         mtx[:] = 0.0
-        mtx[0, super(MatrixWFA, self).get_start()] = 1.0
+        for state, weight in super(MatrixWFA, self).get_starts().iteritems():
+            mtx[0, state] = weight
         return mtx
 
     def compute_transition_closure(self, closure_mode, iterations=0, debug=False):

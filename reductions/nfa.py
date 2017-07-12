@@ -23,14 +23,25 @@ If not, see <http://www.gnu.org/licenses/>.
 import copy
 import core_wfa
 import aux_functions as aux
+import wfa_exceptions
 
 from collections import deque
+
+class NFAOperationException(wfa_exceptions.WFAOperationException):
+    """Exception used when an error during parsing is occured.
+    """
+    def __init__(self, msg):
+        super(NFAOperationException, self).__init__()
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg
 
 """Class representing an NFA.
 """
 class NFA(core_wfa.CoreWFA):
 
-    def __init__(self, transitions=None, finals=None, start=0, alphabet=None):
+    def __init__(self, transitions=None, finals=None, start=None, alphabet=None):
         super(NFA, self).__init__(transitions, finals, start, alphabet)
 
     def is_unambiguous(self):
@@ -45,7 +56,11 @@ class NFA(core_wfa.CoreWFA):
                 return False
         return True
 
-    def get_unambiguous_nfa(self):
+    def get_dfa(self):
+        # TODO: implement on-the-fly determinization
+        pass
+
+    def get_unambiguous_nfa(self, max_states=None):
         """Convert general NFA into UFA. Algorithm from article
         Mohri: A Disambiguation Algorithm for Finite Automata and Functional
         Transducers. The resulting UFA can be exponentialy more succinct than
@@ -53,16 +68,22 @@ class NFA(core_wfa.CoreWFA):
 
         Return instance of NFA.
         """
+        #TODO: Add support for multiple initial states
+        if len(super(NFA, self).get_starts()) != 1:
+            raise NFAOperationException("Only NFA with a single initial state can be converted unambiguous automaton.")
+
         queue = deque([])
         q_prime = set()
 
         b = super(NFA, self).product(self)
         b = b.get_trim_automaton()
         b_states = b.get_states()
-        s = frozenset([super(NFA, self).get_start()])
-        initial = (super(NFA, self).get_start(), s)
+        initial_state = super(NFA, self).get_starts().keys()[0]
+        s = frozenset([initial_state])
+        initial = (initial_state, s)
         queue.append(initial)
         q_prime.add(initial)
+        num_states = 1
 
         finals_set = set([])
         relation = set([(initial, initial)])
@@ -87,8 +108,6 @@ class NFA(core_wfa.CoreWFA):
 
                 delta = []
                 for state in list(s):
-                    if state not in tr_dict.keys():
-                        continue
                     for state_tr in tr_dict[state]:
                         if state_tr.symbol == transition.symbol:
                             delta.append(state_tr.dest)
@@ -109,6 +128,9 @@ class NFA(core_wfa.CoreWFA):
                     if (transition.dest, t_set) not in q_prime:
                         q_prime.add((transition.dest, t_set))
                         queue.append((transition.dest, t_set))
+                        num_states += 1
+                        if (max_states is not None) and (num_states > max_states):
+                            return None
                     new_transitions.add(((p, s), transition.symbol, (transition.dest, t_set)))
 
                     for item in aux.get_related(relation, (p, s)):
@@ -126,7 +148,7 @@ class NFA(core_wfa.CoreWFA):
             finals[fin] = 1.0
 
         alphabet = self.get_alphabet()
-        return NFA(transitions, finals, initial, alphabet)
+        return NFA(transitions, finals, {initial: 1.0}, alphabet)
 
     def get_backward_nfa(self, state):
         """Backward subautomaton (automaton with only final state -- state).
@@ -154,7 +176,7 @@ class NFA(core_wfa.CoreWFA):
             final state. If False automaton might not read the whole input
             (just reach a final state during reading input word)
         """
-        prev_states = set([super(NFA, self).get_start()])
+        prev_states = set([super(NFA, self).get_starts().keys()])
         new_states = set()
         final_states = set(super(NFA, self).get_finals())
         if tr_dict is None:
@@ -164,14 +186,9 @@ class NFA(core_wfa.CoreWFA):
             if len(prev_states) == 0:
                 return False
             for prev in list(prev_states):
-                #if prev not in tr_dict.keys():
-                #    continue
-                try:
-                    for transition in tr_dict[prev]:
-                        if transition.symbol == ord(char):
-                            new_states.add(transition.dest)
-                except KeyError:
-                    continue
+                for transition in tr_dict[prev]:
+                    if transition.symbol == ord(char):
+                        new_states.add(transition.dest)
             prev_states = copy.deepcopy(new_states)
             if (not read_all) and ((final_states & prev_states) != set()):
                 return True
@@ -189,15 +206,20 @@ class NFA(core_wfa.CoreWFA):
 
         Return: List: [NFA]
         """
+
+        if len(super(NFA, self).get_starts()) != 1:
+            raise NFAOperationException("Only NFA with a single initial state can be divided into subautomata.")
+
         ret = []
         candidates = set([])
         reach = {}
         equivalence_class = set([])
         tr_dict = super(NFA, self).get_dictionary_transitions()
-        try:
-            for transition in tr_dict[super(NFA, self).get_start()]:
-                candidates.add(transition.dest)
-        except KeyError:
+        initial_state = super(NFA, self).get_starts().keys()[0]
+
+        for transition in tr_dict[initial_state]:
+            candidates.add(transition.dest)
+        if candidates == set([]):
             return []
 
         for state in list(candidates):
@@ -215,7 +237,7 @@ class NFA(core_wfa.CoreWFA):
         for partition in list(equivalence_class):
             for state in list(partition):
                 partition = partition.union(reach[state])
-            partition = partition.union(frozenset([super(NFA, self).get_start()]))
+            partition = partition.union(frozenset([initial_state]))
             aut = super(NFA, self).get_automata_restriction(partition)
             aut.__class__ = NFA
             ret.append(aut)
@@ -239,6 +261,7 @@ class NFA(core_wfa.CoreWFA):
         Keyword arguments:
         states -- Set of states where the self-loops are added.
         """
+
         alphabet = super(NFA, self).get_alphabet()
         transitions = super(NFA, self).get_transitions()
         finals = super(NFA, self).get_finals()
@@ -264,11 +287,29 @@ class NFA(core_wfa.CoreWFA):
         Keyword arguments:
         states -- list of states where the self-loops are added.
         """
+
+        if len(super(NFA, self).get_starts()) != 1:
+            raise NFAOperationException("Only to an NFA with a single initial state can be added self-loops.")
+
         aut = copy.deepcopy(self)
         aut.add_selfloop(states)
         tr_aut = aut.get_trim_automaton()
         tr_aut.__class__ = NFA
         return tr_aut
+
+    def get_predecessors(self, state):
+        """Operation that finds predessors of the state state.
+
+        Return: List: [State]
+        Keyword arguments:
+        state -- The state whose predessors are found.
+        """
+        ret = set([])
+        transitions = self.get_transitions()
+        for tr in transitions:
+            if tr.dest == state:
+                ret.add(tr.src)
+        return ret
 
 
     def to_dot(self, replace_alphabet=True, state_label=None):
@@ -304,10 +345,12 @@ class NFA(core_wfa.CoreWFA):
                         + str(state) + ", " \
                         + "{:.2e}".format(state_label[state]) + "\"]"
                     dot += ";\n"
-        elif super(NFA, self).get_start() not in super(NFA, self).get_finals():
-            dot += "\"" + str(super(NFA, self).get_start()) + "\"" + " [label=\"" \
-                + str(super(NFA, self).get_start()) + "\"]"
-            dot += ";\n"
+        else:
+            for state in self.get_states():
+                if state not in super(NFA, self).get_finals():
+                    dot += "\"" + str(state) + "\"" + " [label=\"" \
+                        + str(state) + "\"]"
+                    dot += ";\n"
 
         dot += "node [shape = circle];\n"
         for (src, dest), res in super(NFA, self).get_aggregated_transitions().items():
@@ -327,8 +370,12 @@ class NFA(core_wfa.CoreWFA):
         Keyword arguments:
         alphabet -- whether show explicitly symbols from alphabet.
         """
+
+        if len(super(NFA, self).get_starts()) != 1:
+            raise NFAOperationException("Only to an NFA with a single initial state can be converted to the FA format.")
+
         fa = str()
-        fa += str(self._start)+"\n"
+        fa += str(super(NFA, self).get_starts().keys()[0])+"\n"
         if alphabet:
             fa += ":"
             for sym in self.get_alphabet():
@@ -364,3 +411,32 @@ class NFA(core_wfa.CoreWFA):
                 sym_str += "... {0}".format(len(sym))
                 break
         return "[" + sym_str + "]"
+
+    def to_timbuk(self):
+        """Convert NFA to Timbuk format (only NFA with single initial state
+        can be converted to the Timbuk format).
+
+        Return: String (NFA in Timbuk format)
+        """
+        if len(super(NFA, self).get_starts()) != 1:
+            raise NFAOperationException("Only NFA with a single initial state can be converted to the Timbuk format.")
+
+        timbuk = str()
+        timbuk += "Ops "
+        for sym in super(NFA, self).get_alphabet():
+            timbuk += "a{0}:1 ".format(sym)
+        timbuk += "x:0\n\n"
+        timbuk += "Automaton A1\nStates "
+        for state in super(NFA, self).get_states():
+            timbuk += "q{0} ".format(state)
+        timbuk += "\nFinal States "
+
+        for final, _ in super(NFA, self).get_finals().iteritems():
+            timbuk += "q{0} ".format(final)
+        timbuk += "\nTransitions\n"
+
+        timbuk += "x -> q{0}\n".format(super(NFA, self).get_starts().keys()[0])
+        for transition in super(NFA, self).get_transitions():
+            timbuk += "a{0}(q{1}) -> q{2}\n".format(transition.symbol, transition.src, transition.dest)
+
+        return timbuk

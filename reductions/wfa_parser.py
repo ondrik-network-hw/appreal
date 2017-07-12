@@ -81,4 +81,4 @@ class WFAParser(AutomataParser):
             fhandle.close()
             raise AutomataParserException("Bad WFA input format.")
         fhandle.close()
-        return CoreWFA(transitions, finals, 0)
+        return CoreWFA(transitions, finals, {0: 1.0})

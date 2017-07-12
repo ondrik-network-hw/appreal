@@ -216,8 +216,6 @@ def self_loop_reduction(pa, input_nfa, mode, restriction):
         rename_dict = reduction.get_nfa().get_rename_dict()
         for state, weight in back_prob_rev.iteritems():
             back_prob[rename_dict[state]] = weight
-
-        #print back_prob
     else:
         if DIVIDE:
             back_prob = compute_weight_sub(reduction)
@@ -279,20 +277,8 @@ def compute_prob_all(reduction):
         back_prob = reduction.get_finals_prob_subautomaton(matrix_wfa.ClosureMode.inverse, True)
     return back_prob
 
-def pruning_reduction(pa, input_nfa, mode, restriction):
-    """The pruning reduction.
-
-    Return: (NFA, Float) -- (Reduced automaton, error).
-    Keyword arguments:
-    input_nfa -- NFA for reduction.
-    mode -- eps/k reduction
-    restriction -- Value of the restriction parameter.
-    """
-    reduction = pruning.PruningReduction(pa, input_nfa)
-    reduction.prepare()
+def get_back_prob(reduction):
     back_prob = dict()
-    subautomata = None
-
     if LOAD:
         back_prob_rev = load_weights(DIRECTORY, FILEPROB)
         back_prob = {}
@@ -304,6 +290,23 @@ def pruning_reduction(pa, input_nfa, mode, restriction):
             back_prob = compute_prob_sub(reduction)
         else:
             back_prob = compute_prob_all(reduction)
+    return back_prob
+
+def pruning_reduction(pa, input_nfa, mode, restriction):
+    """The pruning reduction.
+
+    Return: (NFA, Float) -- (Reduced automaton, error).
+    Keyword arguments:
+    input_nfa -- NFA for reduction.
+    mode -- eps/k reduction
+    restriction -- Value of the restriction parameter.
+    """
+    reduction = pruning.PruningReduction(pa, input_nfa)
+    reduction.prepare()
+    #back_prob = dict()
+    subautomata = None
+
+    back_prob = get_back_prob(reduction)
 
     if mode == "eps":
         if INTEGERPROGRAMMING:
@@ -396,7 +399,7 @@ def main():
         fhandle.write(red_aut.to_fa_format(True))
         fhandle.close()
     except IOError as e:
-        sys.stderr.write("Error during writing to DOT output file: {0}\n".format(e.message))
+        sys.stderr.write("Error during writing to FA output file: {0}\n".format(e.message))
 
     if params.dot is not None:
         try:

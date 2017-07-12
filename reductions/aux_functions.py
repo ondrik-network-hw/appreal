@@ -31,18 +31,12 @@ def convert_to_pritable(dec, dot=False):
     """
     esc_str = str()
     for ch in dec:
-        if (ord(ch) > 127) or (ord(ch) < 30):
-            esc_str = esc_str + "\\" + hex(ord(ch))
-        elif ch == '\'':
-            esc_str += "\\" + hex(ord(ch))
-        elif ch== '\\' and dot:
-            esc_str += "\\\\"
-        elif ch == '\\' and not dot:
+        if (ord(ch) < 30) or (ord(ch) > 127) or (ch == '\'') or (ch == '"') or (ch == '\\' and not dot):
+            esc_str += "\\{0}".format(hex(ord(ch)))
+        elif (ch == '\\') and (not dot):
             esc_str += "\\"
-        elif ch == '"':
-            esc_str += "\\" + hex(ord(ch))
         else:
-            esc_str = esc_str + ch
+            esc_str += ch
     return esc_str
 
 def get_related(relation, item):
@@ -60,7 +54,7 @@ def get_related(relation, item):
     return ret
 
 
-def list_powerset(lst):
+def list_powerset(base_list):
     """The powerset of the list lst.
 
     Return: Power list.
@@ -68,7 +62,7 @@ def list_powerset(lst):
     lst -- pattern (list) for the power list.
     """
     result = [[]]
-    for x in lst:
+    for x in base_list:
         result.extend([subset + [x] for subset in result])
     return result
 

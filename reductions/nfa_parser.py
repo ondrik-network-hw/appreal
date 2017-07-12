@@ -93,7 +93,7 @@ class NFAParser(AutomataParser):
             fhandle.close()
             raise AutomataParserException("Bad input format.")
         fhandle.close()
-        return NFA(transitions, finals, start)
+        return NFA(transitions, finals, {start: 1.0})
 
     def fa_to_nfa(self, filename):
         """Parse NFA from FA format (similar to Treba format).
@@ -144,4 +144,4 @@ class NFAParser(AutomataParser):
             if not chars.issubset(alphabet):
                 raise AutomataParserException("Transition label is not in given alphabet.")
             alphabet = list(alphabet)
-        return NFA(transitions, finals, start, alphabet)
+        return NFA(transitions, finals, {start: 1.0}, alphabet)

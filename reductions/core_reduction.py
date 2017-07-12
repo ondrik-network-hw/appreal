@@ -20,10 +20,10 @@ You should have received a copy of the GNU General Public License.
 If not, see <http://www.gnu.org/licenses/>.
 """
 
-import copy
-import numpy
 import nfa
 import matrix_wfa
+import approximate_nfa_reachability
+import wfa_exceptions
 
 class CoreReduction(object):
     """Base class for operations used for NFA reductions.
@@ -80,7 +80,6 @@ class CoreReduction(object):
         iterations -- number of iterations in the case of iterative multiplication closure_mode
         """
         language_sum = {}
-        #finals = self.nfa.get_finals().keys()
         for final, _  in self.nfa.get_finals().iteritems():
             language_sum[final] = 0
 
@@ -126,7 +125,7 @@ class CoreReduction(object):
             language_sum[final] = 0
 
         for old, new in wfa_p1.get_rename_dict().iteritems():
-            if new != wfa_p1.get_start():
+            if new not in wfa_p1.get_starts():
                 continue
             for old1, new1 in wfa_p1.get_rename_dict().iteritems():
                 if old1[1] not in finals:
@@ -158,19 +157,48 @@ class CoreReduction(object):
             language_sum[state] = 0
 
         for state in states:
+            #print state
             back = self.nfa.get_backward_nfa(state).get_trim_automaton()
             back.__class__ = nfa.NFA
             if check_unambiguity:
                 if not back.is_unambiguous():
                     back = back.get_unambiguous_nfa().get_trim_automaton()
+                    #print "unambiguous", state, len(back.get_states())
 
+            #print "product start"
             wfa_back = self.pa.product(back)
+            #print "product completed"
             wfa_back = wfa_back.get_trim_automaton()
             wfa_back.rename_states()
+            #print "trimmed completed"
             wfa_back.__class__ = matrix_wfa.MatrixWFA
             language_sum[state] = wfa_back.compute_language_weight(closure_mode, iterations)
+
         return language_sum
 
+
+    def get_states_weight_subautomaton_approximate(self, closure_mode, check_unambiguity, iterations=0):
+        """Approximately compute the weights of the NFA states (state labels).
+
+        Return: Dictionary: State -> float (weight of each state)
+        Keyword arguments:
+        closure_mode -- mode how to compute transition matrix closure (inverse matrix,
+                        iterative multiplication ....)
+        check_unambiguity -- input NFA is surely UFA, we dont need perform unambiguity check
+        iterations -- number of iterations in the case of iterative multiplication closure_mode
+        """
+        nfa_reach = approximate_nfa_reachability.ApproxNFAReach(self.pa, self.nfa)
+
+        try:
+            nfa_reach.prepare()
+            nfa_reach.process_states()
+        except wfa_exceptions.WFAOperationException as e:
+            if e.err_type == wfa_exceptions.WFAErrorType.not_DAG:
+                print "G(A) is not a DAG, approximation cannot be used."
+                return self.get_states_weight_subautomaton(closure_mode, check_unambiguity, iterations)
+            else:
+                raise
+        return nfa_reach.get_language_sum()
 
     def get_states_weight_product(self, closure_mode, iterations=0):
         """Get backward language weights for each state of NFA (weight_P(L^{-1}(q))).
@@ -185,12 +213,9 @@ class CoreReduction(object):
                         iterative multiplication ....)
         iterations -- number of iterations in the case of iterative multiplication closure_mode
         """
-        aut = copy.deepcopy(self.nfa)
-        #aut.make_all_finals()
+        aut = self.nfa
         wfa_p1 = self.pa.product(aut)
         wfa_p1 = wfa_p1.get_trim_automaton()
-        #print "Original:", len(self.pa.product(self.nfa).get_trim_automaton().get_states())
-        #print "All finals:", len(wfa_p1.get_states())
         wfa_p1.rename_states()
         wfa_p1.__class__ = matrix_wfa.MatrixWFA
 
@@ -203,12 +228,11 @@ class CoreReduction(object):
                 raise Exception("Debug error, all states must be final.")
 
         language_sum = {}
-        #finals = aut.get_states()
         for state in aut.get_states():
             language_sum[state] = 0
 
         for old, new in wfa_p1.get_rename_dict().iteritems():
-            if new != wfa_p1.get_start():
+            if new not in wfa_p1.get_starts():
                 continue
             for old1, new1 in wfa_p1.get_rename_dict().iteritems():
                 # if old1[1] not in finals:

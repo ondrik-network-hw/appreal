@@ -14,13 +14,9 @@ CFLAGS=-std=c++11 \
   -Woverloaded-virtual \
   -fdiagnostics-show-option \
   -march=native \
-	-g
-	# -O2
+  -g
+  # -O2
 
-
-INCLUDE=-I../../include
-
-LIBS_ADD=-L../../build/src
 
 LIBS=-lpcap
 
@@ -29,10 +25,19 @@ LIBS=-lpcap
 
 .PHONY: all clean
 
-all: $(patsubst %.cc,%,$(wildcard *.cc))
+all: pcap-sane pcap-histo
 
-%: %.cc
-	g++ $(CFLAGS) $(INCLUDE) $(LIBS_ADD) $< $(LIBS) -o $@
+pcap-sane: pcap-sane.o pcap-util.o
+	g++ $< $(LIBS) pcap-util.o -o $@
+
+pcap-histo: pcap-histo.o pcap-util.o
+	g++ $< $(LIBS) pcap-util.o -o $@
+
+%.o: %.cc
+	g++ $(CFLAGS) -c -o $@ $<
+
+%: %.o pcap-util.o
+	g++ $< $(LIBS) pcap-util.o -o $@
 
 clean:
-	rm -rf $(patsubst %.cc,%,$(wildcard *.cc))
+	rm -rf $(patsubst %.cc,%,$(wildcard *.cc)) pcap-util.o

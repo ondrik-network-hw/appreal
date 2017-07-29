@@ -6,6 +6,8 @@
 #include <fstream>
 #include <vector>
 
+#include "pcap-util.hh"
+
 // PCAP-related headers
 #include <pcap.h>
 #include <net/ethernet.h>
@@ -69,14 +71,8 @@ int main(int argc, char** argv)
 	std::string packets_file = argv[1];
 	std::string dumper_file = argv[2];
 
-	char errbuf[PCAP_ERRBUF_SIZE];
 	// open capture file for offline processing
-	pcap_t *descr = pcap_open_offline(packets_file.c_str(), errbuf);
-	if (nullptr == descr)
-	{
-		std::cout << "pcap_open_offline() failed: " << errbuf << "\n";
-		return EXIT_FAILURE;
-	}
+	pcap_t *descr = pcap_util::pcap_open(packets_file);
 
 	dumper = pcap_dump_open(descr, dumper_file.c_str());
 	if (nullptr == dumper)

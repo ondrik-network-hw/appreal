@@ -25,12 +25,15 @@ LIBS=-lpcap
 
 .PHONY: all clean
 
-all: pcap-sane pcap-histo
+all: pcap-sane pcap-histo pcap-freq-extr
 
 pcap-sane: pcap-sane.o pcap-util.o
 	g++ $< $(LIBS) pcap-util.o -o $@
 
 pcap-histo: pcap-histo.o pcap-util.o
+	g++ $< $(LIBS) pcap-util.o -o $@
+
+pcap-freq-extr: pcap-freq-extr.o pcap-util.o
 	g++ $< $(LIBS) pcap-util.o -o $@
 
 %.o: %.cc

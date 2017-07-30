@@ -92,4 +92,3 @@ void packetHandler(
 		std::cout.flush();
 	}
 }
-

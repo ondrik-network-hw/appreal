@@ -1,0 +1,5 @@
+*.o
+
+pcap-sane
+pcap-histo
+pcap-freq-extr

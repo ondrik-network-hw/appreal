@@ -1,0 +1,236 @@
+2017/07/25 - 	Sagan rule release.
+
+	* New Proxy/Zscaler rules
+	  https://github.com/beave/sagan-rules/commit/fb0b90e23479a791adfa0cf685464aaec2776375
+
+	* Changed "file system full" windows event to "system-error".
+	  https://github.com/beave/sagan-rules/commit/6eeaccc37f38115919176ac3258da7419591cdd3
+
+	* New & modifications to nxlog rules. To better detect failures with nxlog
+	  https://github.com/beave/sagan-rules/commit/15b8c63d025d543195496916ff85bf7dd75d5605
+
+	* Removed port number from 5001695 (Windows domain administrator rule)
+	  https://github.com/beave/sagan-rules/commit/989bb56e280c10c4b6f144b1c994edc6caca9d8e
+
+	* Removed redundant IOC from Petya rule
+	  https://github.com/beave/sagan-rules/commit/492bb3d8a726d9c53faef23fcb8915dfc9af31ca
+
+	* Modifications and new hashes add to Petya rules
+	  https://github.com/beave/sagan-rules/commit/18c6a8cebcafc1ba88da9608b19da44e39c7f213
+
+	* Set xbit windows.reboot / 900 seconds
+	  https://github.com/beave/sagan-rules/commit/37b1eef4977af3fa991b402f981fe9937c81f1a5
+
+	* New Bluedot md5/sha1/sha256 generic rule lookup.
+	  https://github.com/beave/sagan-rules/commit/5425e268fd7e491af9c85dafbfa0db76c098d0d6
+
+2017/05/31 -	Sagan rule release
+
+	* Threshold of sid 5000096 and 5000100 (attack.rules - "possible biffer overflow attempt")
+	  https://github.com/beave/sagan-rules/commit/b39ce84bbafc365c07fb9212bcc4dbb0164ad427
+
+	* Modification of 5003052 (cisco-meraki) to prevent false positives.
+	  https://github.com/beave/sagan-rules/commit/b647b31e3c3cf2761260cf536b3e9fc052675d40
+
+	* New 5003101 & 5003102 "broken domain trust" rules added to "windows-auth.rules". Modified
+	  5001763 to only identify brute force attacks.
+	  https://github.com/beave/sagan-rules/commit/bf9286858a7cb880906726d277f91b4480233fc3
+
+	* New sid 5003104 "User added to schema group" (windows-auth.rules).
+	  https://github.com/beave/sagan-rules/commit/3923d1d2184acda8d5e4cc68ed03db0dd358215f
+
+	* Incorrect normalization for Snort fix (normalization.rulebase)
+	  https://github.com/beave/sagan-rules/commit/bdd1e83664138a81121df0011a50650127f5f3b0
+
+	* Change to more traditional rule format.  Sagan now mimics Snort/Suricata.  "bit9.rules"
+	  are now "carbonblack.rules".
+	  https://github.com/beave/sagan-rules/commit/6b3130d9bb9ea19b2e81ae1e43a22a91e06e60ee
+
+	* Disable many program-error and hardware-event classtype rules.  For example,  by 
+	  older EOL Cisco hardware errors are no longer enabled.
+	  https://github.com/beave/sagan-rules/commit/5bf0638d0d2a57b32941c6b7bfa81edf4977e492
+
+	* Added more clear description of sid 5002955 (windows-misc.rules) - "Logging has been
+	  stopped on this device" rather than "subscription callback error recieved".
+	  https://github.com/beave/sagan-rules/commit/55b3cdfc16da0f36b3052054f826a260f00a5f4e
+
+	* Theshold of sid 5000068 (openssh.rules - bad protocol - network scan). 
+	  https://github.com/beave/sagan-rules/commit/d68d69766cbc07a18de8f2c8afbfa47f2362504a
+
+	* New linux-kernel.rules 5003115 (disabled by default) - "Bad UDP checksum".
+	  https://github.com/beave/sagan-rules/commit/c8e0d6bd573766c665e439dcf49c0151f9ae9389
+
+	* New Adykuzz rules (windows-malware.ruels) - 5003116, 5003117. 
+	  https://github.com/beave/sagan-rules/commit/1c17149f17654c13a3e8368cb8e7f685da41ef32
+	
+	* Disable Cisco "LAND" attack rules.  Because,  well,  it's not 1998 anymore.
+	  https://github.com/beave/sagan-rules/commit/552ab5295427c12437f99210a555162e3bbf2fd9
+		
+	* Various other minor fixes.....
+
+2017/03/16 - 	Sagan rule release
+
+	* Excluded of NTP traffic on cisco-bluedot.rules sid 5002869.
+	  https://github.com/beave/sagan-rules/commit/123600f5060b7741a9755d4af10a7b064b755052
+
+	* New watchguard.rules and watchguard-geoip.rules added!
+	  https://github.com/beave/sagan-rules/commit/32e7d4493c6be69648692d82e24611b120198e5b
+
+	* New "cisco-meraki.rules" added! 
+	  https://github.com/beave/sagan-rules/commit/51df9273d9972d0175afdd51dd429b2fb0cab678
+
+	* Added program "System" to sid 5002015 (System shutdown with xbit set). 
+	  https://github.com/beave/sagan-rules/commit/603748ee69c311b84bc7c19bcf075dc9dd76a0a3
+
+	* New Windows "Fan failure" rule added to windows-misc.rules
+	  https://github.com/beave/sagan-rules/commit/d67ad74096528018c6870c35fb2318f334923a83
+
+2016/12/30 - 	Sagan rule release
+
+	* New rule to detect MS Windows "administrator" logins (disabled by default):
+	  https://github.com/beave/sagan-rules/commit/6f7f610504b4cc6fc4f9054c75be68dc4d9ac866
+	
+	* New Bluedot "Proxy" category added to "categories.conf"
+	  https://github.com/beave/sagan-rules/commit/e9cc591f3578afb21dad53013b4e419a0b2b6b31
+
+	* Modification to "fortinet-malware.rules", quote: "Remove ip-reputation detection type (too many false positives) - waysidekt @ Github.  Merged. 
+	  https://github.com/beave/sagan-rules/commit/faa146e76f0cd681d78d9402b8e520af01ca05cc
+	  https://github.com/beave/sagan-rules/commit/60d67e3ef9241984e97cd63ddafd9603acf1d557
+
+	* New "zimbra.rules" & "zimbra-geoip.rules.rules"
+	  https://github.com/beave/sagan-rules/commit/4cbe174e239620d217a69acf7cd072b169e61e84
+
+	* Removed unneeded "dynamic" classification. 
+	  https://github.com/beave/sagan-rules/commit/21e351a2aa2649e48fc9ccec5b184e9bd5c457ff
+
+	* Fixed typo in "dynamic.rules"
+	  https://github.com/beave/sagan-rules/commit/4142ff22b0c7d2bce147a3720a89bbbea5a0dcde
+
+	* New "cisco-meraki.rules" rules,  thanks to waysidekt @ Github. 
+	  https://github.com/beave/sagan-rules/commit/ccd78559dc18ded5a677f88b19d5907352daacd2
+
+2016/11/07 -    Sagan rule release
+
+	* Fixed "[WINDOWS-MALWARE] Lower case drive letter used in process" with meta_content.
+	  https://github.com/beave/sagan-rules/commit/bf830056ab68aa090d680e2540926e4bb0fa3e18
+
+	* Disabled two noisy iptables rules by default (sid 5001104 & 5001105(
+	  https://github.com/beave/sagan-rules/commit/889c5cc894e3cdca9545d5771e0c3a97ab800f47
+
+	* Fixed PCRE error in sid 5002011 ("[WINDOWS-MALWARE] System protection disabled").
+	  https://github.com/beave/sagan-rules/commit/af62f8d6b2163934160c8499fcebcac9f65ca31d
+
+	* Disabled Snort "not suspicious" rules sid 5000976 & 5000386.
+	  https://github.com/beave/sagan-rules/commit/f033c7b856d1a861c4d96310193cbe047a5107a0
+
+	* Disabled generic rsync connection rules 5001052 & 5001053.
+	  https://github.com/beave/sagan-rules/commit/a4050c989a678d1db55af49d2eb333acfb56ff9d
+
+	* Added content:!"access denied by ACL" to generic/catchall sid 5000119.
+	  https://github.com/beave/sagan-rules/commit/e6a6da892bc4b8ef7ace13aeb05ef4ee185b2221
+
+	* Fixed bad PCRE in sid 5002956 ("Suspicious Service Control Manager Call")
+	  https://github.com/beave/sagan-rules/commit/7ce9197c811ed0203e73195910db0501daec75c9
+
+	* Added sid 5003024 "Alcatraz ransomware" detection.
+	  https://github.com/beave/sagan-rules/commit/c879a1900dda19ad1cfd96e92e6d0dc33fa1eb5b
+	
+	* Removed program "(squid)" for various "squid.rules". 
+
+	* New rule set "dynamic.rules".  These rules detect "new" logs and automatically load
+	  other rulesets. 
+
+	* Added program "Application" to windows-mssql.rules
+	  https://github.com/beave/sagan-rules/commit/39233a9841fe1e572dafc54b6d5db08eea2e8459
+
+	* Disabled noisy sid 5000677 ("ICMPv6 Denied").
+	  https://github.com/beave/sagan-rules/commit/a0637cb189b2f86a43de0a3742ab89ea8b7ffa7c
+
+	* Added "exploit_attempt" flowbit for correlated rules.
+	  https://github.com/beave/sagan-rules/commit/89a19da7c803be97ee7e83929fd406138c8a20db
+
+	* New "Suspicious Service Control Manager Call" signatures as @jackcr Derbycon talk.
+	  https://github.com/beave/sagan-rules/commit/8b3655c41499404972649cbf2f7614655cc12d90
+
+
+2016/09/23 - 	Sagan rule release
+
+	* Disabled many nfcapd.rules. These are low value rules 
+	  https://github.com/beave/sagan-rules/commit/00df337cefc41f84d53ab1e17a9a05c7c2f2e433
+
+	* Rules 500295[0123] fixed "any -> any" typo
+	  https://github.com/beave/sagan-rules/commit/2aad0351efaf92b09a222f8afca7ea4a49c1ded2
+
+	* Removed "Tor" nfcapd-malware.rules.  These are low value rules (better ways to catch Tor traffic)
+	  https://github.com/beave/sagan-rules/commit/2a41f85b7b58b7c85c85fdfcb6dcee31dd1eb668
+
+	* Flowbit fix in sid 5002941 ([WINDOWS-MISC] Suspicious event logging service shut down)
+	  https://github.com/beave/sagan-rules/commit/a6042fccbf8e74c13f36ae6ddcd0640399da69c1
+
+	* Modification of sid web-attack.rules 5001843 to ignore the word "Vegas"
+	  https://github.com/beave/sagan-rules/commit/056d588034c4d029abdc825cece4cb9b46773c0b
+
+	* Two new rules targetting Evtsys errors. Sid 5001185 changed to address evtsys issue.
+	  https://github.com/beave/sagan-rules/commit/079e19f9f9dc300a879de51b1e2991b846f79e19
+
+2016/08/30 -	Sagan rule release
+
+	* vsftp, proftp, pureftp and generic ftp rules for "ftpchk3".  See https://blog.ftptoday.com/ftp-password-stealing-malware
+	  https://github.com/beave/sagan-rules/commit/9f04bf22570801f4fa4f4f96ef561d95010d717e
+	  https://github.com/beave/sagan-rules/commit/2a227378143ed10fb4db3696092ead39841a54d2
+
+	* Added "FTP|FTPD" to program field in ftpd.rules
+	  https://github.com/beave/sagan-rules/commit/27e2d99ccdc69a99ce7b6b1899ce4e01ef27ab39
+
+	* Updated all Cisco ASA rules to take into account when Cisco "Emblem" is enabled
+	  https://github.com/beave/sagan-rules/commit/83d4c122a25114fc716cac8dc9d2ed81ce2b61cb
+	  https://github.com/beave/sagan-rules/commit/7e12112fa1abfffaffb94d45a17a068e5c1da128
+
+	* bit9.rules update to take into account "customer" program field. 
+	  https://github.com/beave/sagan-rules/commit/83d4c122a25114fc716cac8dc9d2ed81ce2b61cb
+
+	* cisco-prime "recon" flowbit added to sid 5002175
+	  https://github.com/beave/sagan-rules/commit/ead9c3399fed3ba920f7760abe0bc7c009b59081
+
+	* ngix.rules new brute force rule & "brute_force" flowbit added - 5002948
+	  https://github.com/beave/sagan-rules/commit/ead9c3399fed3ba920f7760abe0bc7c009b59081
+
+	* oracle.rules new brute force rule & "brute_force" flowbit added - sid 5002949
+	  https://github.com/beave/sagan-rules/commit/ead9c3399fed3ba920f7760abe0bc7c009b59081
+
+	* cisco-prime.rules clean up of invalid references. 
+	  https://github.com/beave/sagan-rules/commit/ead9c3399fed3ba920f7760abe0bc7c009b59081
+
+	* ipop3d.rules new "brute_force" flowbit added - sid 5000032
+	  https://github.com/beave/sagan-rules/commit/8058562a727e9fa4dcad8639b062ae5555ec95c8
+
+	* New Big IP F5 rules (f5-big-ip.rules) 
+	  https://github.com/beave/sagan-rules/commit/6aa0e58eb1249cae31c2ea60a61bedd00e1cc390
+
+	* bash.rules changes to better detect certain command line options 
+	  https://github.com/beave/sagan-rules/commit/7e12112fa1abfffaffb94d45a17a068e5c1da128
+
+	* apache.rules new "brute_force" & "recon" flowbits added. 
+	  https://github.com/beave/sagan-rules/commit/32373afab6cc557c95f7c2f18fdf61336fc54b72
+
+	* artillery.rules new "honeypot" & "flowbits" added. 
+	  https://github.com/beave/sagan-rules/commit/32373afab6cc557c95f7c2f18fdf61336fc54b72
+
+	* barracuda.rules new brute force rules and flowbits
+	  https://github.com/beave/sagan-rules/commit/32373afab6cc557c95f7c2f18fdf61336fc54b72
+
+	* asterisk.rules new brute force & "brute_force" flowbits
+	  https://github.com/beave/sagan-rules/commit/32373afab6cc557c95f7c2f18fdf61336fc54b72
+
+	* Correaction in su.rules that could lead to false positives.  
+	  https://github.com/beave/sagan-rules/commit/22173a81ede60f166403b124a62cef4a82fb9616
+
+	* bro-ids.rules "brute_force" flowbit added. 
+	  https://github.com/beave/sagan-rules/commit/32373afab6cc557c95f7c2f18fdf61336fc54b72
+
+	* Changes to widnows-geoip.rule to work around https://support.microsoft.com/en-us/kb/3097467
+	  https://github.com/beave/sagan-rules/commit/22173a81ede60f166403b124a62cef4a82fb9616
+
+	* windows-misc.rules added event 1100 detection.
+	  https://github.com/beave/sagan-rules/commit/1458068d33082fe937c934130ef9d730199fe834
+

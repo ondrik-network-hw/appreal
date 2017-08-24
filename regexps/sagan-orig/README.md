@@ -1,5 +1,5 @@
 The content of this directory is taken from [beave/sagan-rules](https://github.com/beave/sagan-rules).
-I believe the licence should by GPLv2 (accordint to the licence of [sagan](https://quadrantsec.com/sagan_log_analysis_engine/).
+I believe the licence should by GPLv2 (according to the licence of [sagan](https://quadrantsec.com/sagan_log_analysis_engine/).
 
 original README follows
 ------------------------------------

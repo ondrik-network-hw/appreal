@@ -11,7 +11,6 @@ reductions/pcap/
 reductions/subautomata/
 reductions/learning/treba
 
-regexps/
 netbench/
 automata/
 

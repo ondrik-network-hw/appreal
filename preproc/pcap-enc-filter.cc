@@ -110,14 +110,12 @@ void packetHandler(
 	const u_char* payload;
 	int len;
 	std::tie(payload, len) = pcap_util::get_payload(pkthdr, packet);
-	if (len < 0) { return; }
+	if (len < 0) { goto packet_proc_end; }
 
 	// Maybe treat all packets shorter than some threshold unencrypted?
-	bool too_short = len < 16;
-	if (too_short)
-	{
-		return;
-	}
+	bool too_short;
+	too_short = len < 16;
+	if (too_short) { goto packet_proc_end; }
 
 	// Test statistical properties of the packet payload
 	double ent, chisq, mean, montepi, scc;
@@ -125,28 +123,51 @@ void packetHandler(
 	rt_add(const_cast<u_char*>(payload), std::min(len,16));
 	rt_end(&ent, &chisq, &mean, &montepi, &scc);
 
-	if (!too_short && total_packets < 500)
-	{
-		std::clog << "Packet #" << total_packets << "\n";
-		std::clog << "Length: " << len << "\n";
-		std::clog << "Entropy: " << ent << "\n";
-		std::clog << "Chi Square: " << chisq << "\n";
-		std::clog << "Mean: " << mean << "\n";
-		std::clog << "Monte Carlo Pi: " << montepi << "\n";
-		std::clog << "Serial Correlation Coefficient: " << scc << "\n";
-	}
+	// if (!too_short && total_packets < 500)
+	// {
+	// 	std::clog << "Packet #" << total_packets << "\n";
+	// 	std::clog << "Length: " << len << "\n";
+	// 	std::clog << "Entropy: " << ent << "\n";
+	// 	std::clog << "Chi Square: " << chisq << "\n";
+	// 	std::clog << "Mean: " << mean << "\n";
+	// 	std::clog << "Monte Carlo Pi: " << montepi << "\n";
+	// 	std::clog << "Serial Correlation Coefficient: " << scc << "\n";
+	// }
 
 	// bool matches_enc_test = ent > 6.0;
-	bool matches_enc_test = scc < 0.1;
+	// matches_enc_test = scc < 0.1;
+	bool matches_stat_test;
+	// matches_enc_test = mean > 95;
+	matches_stat_test = mean > 95;
 
-	if ((keep_encrypted && matches_enc_test) ||
-		(!keep_encrypted && !matches_enc_test) ||
-		(!keep_encrypted && too_short))
+	bool contains_zero_byte;
+	contains_zero_byte = false;
+	// find a 0x00 byte - if found, throw away
+	for (size_t i = 0; i < size_t(len); ++i)
+	{
+		if (payload[i] <= 7)
+		{
+			contains_zero_byte = true;
+			break;
+		}
+	}
+
+	bool matches_enc_test;
+	matches_enc_test = false;
+	// matches_enc_test = matches_enc_test || matches_stat_test;
+	matches_enc_test = matches_enc_test || contains_zero_byte;
+
+	bool should_save;
+	should_save = (keep_encrypted && matches_enc_test) ||
+		(!keep_encrypted && !matches_enc_test);
+
+	if (should_save)
 	{
 		++filtered_packets;
 		pcap_dump((u_char*)dumper, pkthdr, packet);
 	}
 
+packet_proc_end:
 	if (total_packets % 10000 == 0)
 	{
 		std::clog << "#";

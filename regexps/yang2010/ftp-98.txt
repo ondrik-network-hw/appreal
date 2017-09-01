@@ -1,0 +1,98 @@
+/^530\s+(Login|User)/smi
+/^ALLO[ \t][^\n]{200}/mi
+/^APPE[ \t][^\n]{200}/mi
+/.*authorized_keys/
+/^CEL[ \t][^\n]{100}/mi
+/^CMD[ \t][^\n]{200}/mi
+/^CWD\s+~root/smi
+/^CWD\s+~/smi
+/^CWD[ \t]+~/mi
+/^CWD[ \t][^\n]{180}/mi
+/^CWD[ \t]+~root/mi
+/^DELE[ \t][^\n]{100}/mi
+/.*\.forward/
+/^HELP[ \t][^\n]{200}/mi
+/^LIST[^\n]{120}/smi
+/^LIST\s+\x22-W\s+\d+/smi
+/^LIST[ \t]+\x22-W[ \t]+\d+/mi
+/^MDTM \d+[-+]\D/mi
+/^MDTM \d+[-+]\D/smi
+/^MDTM[ \t][^\n]{100}/mi
+/^MKDIR[ \t]([^\n%]*%){2}/mi
+/^MKD[ \t][^\n]{180}/mi
+/^MODE\s+[^ABSC]{1}/msi
+/^NLST\s+[^\n]*\x2a{10}/smi
+/^NLST[ \t][^\n]{200}/mi
+/^NLST[ \t][^\n]*\x2a\x2a\x2a\x2a\x2a\x2a\x2a\x2a\x2a\x2a/mi
+/.*pass -cklaus/
+/.*PASS ddd@\x0A/
+/.*pass -iss@iss/
+/.*pass -saint/
+/.*pass -satan/
+/^PASS\s*\n/smi
+/^PASS[ \t][^\n]{100}/mi
+/^PASS[ \t]([^\n%]*%){2}/mi
+/^PORT/mi
+/^PORT/smi
+/^PORT[ \t][^\n]{400}/mi
+/.*[pP][aA][sS][sS] [wW][hH]00[tT]/
+/^PWD\s.{190}/smi
+/^PWD[ \t][^\n]{190}/mi
+/^RENAME[ \t]([^\n%]*%){2}/mi
+/.*REST\s+[0-9]+\n/i
+/REST[ \t]+[0-9]+\n/i
+/^REST[ \t][^\n]{100}/mi
+/^RETR[ \t][^\n]{200}/mi
+/^RETR[ \t]([^\n%]*%){2}/mi
+/.*\.rhosts/
+/^RMDIR[ \t][^\n]{100}/mi
+/^RMD[ \t][^\n]{100}/mi
+/^RMD[ \t]+\x2f$/mi
+/^RNFR\s[^\n]{200}/smi
+/^RNFR[ \t][^\n]{200}/mi
+/^rnto\s[^\s\x0d\x0a]*\x2e\x2e(\x2f|\x5c)/i
+/^RNTO[ \t][^\n]{200}/mi
+/(.*[rR][eE][tT][rR].*passwd)|(.*passwd.*[rR][eE][tT][rR])/
+/(.*[rR][eE][tT][rR].*shadow)|(.*shadow.*[rR][eE][tT][rR])/
+/(.*[rR][nN][fF][rR] .* \.\/\.\/)|(.* \.\/\.\/.*[rR][nN][fF][rR] )/
+/^SITE\s+CHMOD\s[^\n]{200}/smi
+/^SITE\s+CHOWN\s[^\n]{100}/smi
+/^SITE\s+CPWD\s[^\n]{100}/smi
+/^SITE\s+EXEC/smi
+/^SITE\s+NEWER/smi
+/^SITE\s+NEWER\s[^\n]{100}/smi
+/^SITE\s*(\w+\s*)+\x7c/smi
+/^SITE\s+ZIPCHK\s[^\n]{100}/smi
+/^SITE[ \t]+CHMOD[ \t][^\n]{200}/mi
+/^SITE[ \t]+CHOWN[ \t][^\n]{100}/mi
+/^SITE[ \t]+CPWD[ \t][^\n]{100}/mi
+/^SITE[ \t]+EXEC[ \t]([^\n%]*%){2}/mi
+/^SITE[ \t]+INDEX[ \t]([^\n%]*%){2}/mi
+/^SITE[ \t][^\n]{100}/mi
+/^SITE[ \t]+NEWER[ \t][^\n]{100}/mi
+/^SITE[ \t]+ZIPCHK[ \t][^\n]{100}/mi
+/^SIZE[ \t]+[\x2F\x5C][^\x2F\x3A\x5C\n][^\n]{526}/mi
+/^STAT\s+[^\n]*\x2a/smi
+/^STAT\s+[^\n]*\x3f/smi
+/^STAT[ \t][^\n]{190}/mi
+/^STAT[ \t][^\n]*\x2a/mi
+/^STAT[ \t][^\n]*\x3f/mi
+/^STOR[ \t][^\n]{200}/mi
+/^STOU\s[^\n]{200}/smi
+/^STOU[ \t][^\n]{200}/mi
+/^SYST[ \t][^\n]{100}/mi
+/^TEST[ \t][^\n]{100,}/mi
+/^TEST[ \t][^\n]{100}/mi
+/^[ \t]+[^ \t\n]([^\n%]*%){2}/mi
+/^USER\s+(anonymous|ftp)[^\w]*[\r\n]/smi
+/^USER\s+w0rm/smi
+/^USER[ \t][^\n]{100,}/mi
+/^USER[ \t][^\n]{100}/mi
+/^USER[ \t]([^\n%]*%){2}/mi
+/^USER[ \t]+w0rm/mi
+/^USER[ \t]+y049575046/mi
+/.* --[uU][sS][eE]-[cC][oO][mM][pP][rR][eE][sS][sS]-[pP][rR][oO][gG][rR][aA][mM] /
+/.*We\s+got\s+this\s+GREAT\s+Daemon.*Fictional\s+Daemon/smi
+/^XCWD[ \t][^\n]{100}/mi
+/^XMD5[ \t][^\n]{200}/mi
+/^XMKD[ \t][^\n]{200}/mi

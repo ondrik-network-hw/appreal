@@ -1,5 +1,5 @@
 /^POST \S* HTTP\/[01]\.[019]\r\n(\V+\r\n)*\r\n.*DROP TABLE/
-/^HTTP/[01]\.[019] 404.*(admin|wordpress)/
+/^HTTP\/[01]\.[019] 404.*(admin|wordpress)/
 /^POST \S* HTTP\/[01]\.[019]\r\n(\V+\r\n)*\r\n.*admin:admin/
 /^POST \S* HTTP\/[01]\.[019]\r\n(\V+\r\n)*\r\n.*admin:password/
 /^POST \S* HTTP\/[01]\.[019]\r\n(\V+\r\n)*\r\n.*YWRtaW46cGFzc3dvcmQ/

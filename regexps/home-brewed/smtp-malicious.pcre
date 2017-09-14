@@ -1,0 +1,7 @@
+# Ondra's suggestions for SMTP malicious traffic
+/^554.*virus/
+/^554.*rejected/
+/^554.*not allowed/
+/^553.*Spam/
+/^550.*SpamAssassin/
+

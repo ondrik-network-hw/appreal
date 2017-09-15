@@ -1,0 +1,8 @@
+/\r\nAuthorization\x3a\s*Basic[^\n]{256}/mi
+/\r\nAuthorization\x3a\s*Basic\s+(?-i)YWRtaW46YWRtaW4[=\s]/smi
+/\r\nAuthorization\x3a(\s*|\s*\r?\n\s+)Basic\s[^\n]{250}/smi
+/\r\nAuthorization\x3a(\s*|\s*\r?\n\s+)Basic\s[^\n]{512}/smi
+/\r\nAuthorization\x3a(\s*|\s*\r?\n\s+)Basic\s+OmFkbWlu/smi
+/\r\nAuthorization\x3a(\s*|\s*\r?\n\s+)Basic\s+=/smi
+/\r\nAuthorization\x3a(\s*|\s*\r?\n\s+)Basic\s+YWRtaW46cGFzc3dvcmQ/smi
+/\r\nAuthorization|3A|\s*Basic\s+TERBUF9Bbm9ueW1vdXM6TGRhcFBhc3N3b3JkXzE=/smi

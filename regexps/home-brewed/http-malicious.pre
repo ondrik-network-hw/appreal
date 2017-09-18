@@ -1,7 +1,7 @@
-/^POST \S* HTTP\/[01]\.[019]\r\n(\V+\r\n)*\r\n.*DROP TABLE/
-/^HTTP\/[01]\.[019] 404.*(admin|wordpress)/
-/^POST \S* HTTP\/[01]\.[019]\r\n(\V+\r\n)*\r\n.*admin:admin/
-/^POST \S* HTTP\/[01]\.[019]\r\n(\V+\r\n)*\r\n.*admin:password/
-/^POST \S* HTTP\/[01]\.[019]\r\n(\V+\r\n)*\r\n.*YWRtaW46cGFzc3dvcmQ/
-/^POST \S* HTTP\/[01]\.[019]\r\n(\V+\r\n)*\r\n.*YWRtaW46YWRtaW4/
-/^POST \S* HTTP\/[01]\.[019]\r\n(\V+\r\n)*\r\n.*\/bin\/sh/
+/^POST \S* HTTP\/[01]\.[019]\r\n(\V+\r\n)*\r\n[\x00-\xff]*DROP TABLE/
+/^HTTP\/[01]\.[019] 404[\x00-\xff]*(admin|wordpress)/
+/^POST \S* HTTP\/[01]\.[019]\r\n(\V+\r\n)*\r\n[\x00-\xff]*admin:admin/
+/^POST \S* HTTP\/[01]\.[019]\r\n(\V+\r\n)*\r\n[\x00-\xff]*admin:password/
+/^POST \S* HTTP\/[01]\.[019]\r\n(\V+\r\n)*\r\n[\x00-\xff]*YWRtaW46cGFzc3dvcmQ/
+/^POST \S* HTTP\/[01]\.[019]\r\n(\V+\r\n)*\r\n[\x00-\xff]*YWRtaW46YWRtaW4/
+/^POST \S* HTTP\/[01]\.[019]\r\n(\V+\r\n)*\r\n[\x00-\xff]*\/bin\/sh/

@@ -25,11 +25,11 @@ from scapy.all import PcapReader, Raw
 import sys
 import getopt
 
-import core_parser
-import nfa_parser as parser
+import parser.core_parser as core_parser
+import parser.nfa_parser as parser
 
 #Maximum number of considerated packets
-MAXPACKETS = 1000000
+MAXPACKETS = 1
 
 class EvalParams(object):
     """Parameters of the application.
@@ -86,15 +86,13 @@ def main():
         sys.stderr.write("Wrong program parameters\n")
         sys.exit(1)
 
-    nfa_parser = parser.NFAParser()
-
     input_nfa = None
     reduced_nfa = None
     reader = None
 
     try:
-        input_nfa = nfa_parser.fa_to_nfa(params.input_nfa)
-        reduced_nfa = nfa_parser.fa_to_nfa(params.reduced_nfa)
+        input_nfa = parser.NFAParser.fa_to_nfa(params.input_nfa)
+        reduced_nfa = parser.NFAParser.fa_to_nfa(params.reduced_nfa)
         reader = PcapReader(params.pcap)
     except IOError as exc:
         sys.stderr.write("I/O error: {0}\n".format(exc.strerror))
@@ -102,15 +100,14 @@ def main():
     except core_parser.AutomataParserException as exc:
         sys.stderr.write("Error during parsing NFA: {0}\n".format(exc.msg))
         sys.exit(1)
-    except Exception as exc:
-        sys.stderr.write("Error during parsing input files: {0}\n"\
-            .format(exc.message))
-        sys.exit(1)
 
     if params.count == None:
         max_packets = MAXPACKETS
     else:
         max_packets = params.count
+
+    #print reduced_nfa.accept_word("530 L")
+    #return 0
 
     c_all, c_real, in_acc, red_acc, err = compare_automata(reader,\
         input_nfa, reduced_nfa, max_packets)
@@ -143,6 +140,7 @@ def compare_automata(reader, input_nfa, reduced_nfa, max_packets):
     acc = 0
     input_tr_dict = input_nfa.get_dictionary_transitions()
     red_tr_dict = reduced_nfa.get_dictionary_transitions()
+    #total = 0
     for packet in reader:
         if counter_all >= max_packets:
             break
@@ -166,9 +164,6 @@ def compare_automata(reader, input_nfa, reduced_nfa, max_packets):
 
         counter_real += 1
         counter_all += 1
-
-        if counter_all % 10000 == 0:
-            print "Checkpoint: ", counter_all, misclassified
 
     return (counter_all, counter_real, input_accept,\
         reduced_accept, misclassified)

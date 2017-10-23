@@ -28,15 +28,20 @@ import FAdo.fio
 import sys
 import getopt
 
-import core_parser
-import wfa_parser
+import parser.core_parser as core_parser
+import parser.wfa_parser as wfa_parser
+import wfa.core_wfa_export as core_wfa_export
+
+import wfa.aux_functions as aux
 
 #from scapy.all import *
 
 #Maximum number of packets for learning.
-MAXPACKETS = 4
+MAXPACKETS = 25000
 #Index of the first considered packet.
 STARTPACKET = 0
+T0 = 1
+ALPHA = 0.0001
 
 HELP = "Program for learning PAs from network traffic (uses tool Treba).\n"\
         "-i pcap -- Input .pcap file.\n"\
@@ -132,24 +137,19 @@ def main():
 
     if not alphabet_check():
         sys.stderr.write("Alphabet should contain 256 symbols and no gaps.\n")
-        sys.exit(1)
     else:
         print "Alphabet checked: OK"
 
-    parser = wfa_parser.WFAParser()
-
     print("Learning probabilistic automaton ...")
-    os.system("./learning/treba --train=merge --alpha=0.05 --t0=1 {0}.obs > {1}.fsm".format(out_name, out_name))
+    os.system("./learning/treba --train=merge --alpha={0} --prior=0.0 --t0={1} {2}.obs > {3}.fsm".format(ALPHA, T0, out_name, out_name))
     try:
-        fa = parser.treba_to_wfa("{0}.fsm".format(out_name))
+        fa =  wfa_parser.WFAParser.treba_to_wfa("{0}.fsm".format(out_name))
+        fa.__class__ = core_wfa_export.CoreWFAExport
     except IOError as e:
         sys.stderr.write("I/O error: {0}\n".format(e.strerror))
         sys.exit(1)
     except core_parser.AutomataParserException as e:
         sys.stderr.write("Error during parsing learned PA: {0}\n".format(e.msg))
-        sys.exit(1)
-    except Exception as e:
-        sys.stderr.write("Error during parsing input files: {0}\n".format(e.message))
         sys.exit(1)
 
     if fa.all_states_final():
@@ -157,7 +157,7 @@ def main():
     else:
         print "All states finals: Failed (may cause problems during reduction)"
 
-    handle_dots(params, parser, out_name, fa_file, dot_supp_file, dot_prob_file, fa)
+    handle_dots(params, out_name, fa_file, dot_supp_file, dot_prob_file, fa)
 
 
 def convert_to_treba_obs(dec):
@@ -173,12 +173,11 @@ def convert_to_treba_obs(dec):
         alphabet.add(ord(ch))
     return ret
 
-def handle_dots(params, parser, out_name, fa_file, dot_supp_file, dot_prob_file, fa):
+def handle_dots(params, out_name, fa_file, dot_supp_file, dot_prob_file, fa):
     """Handle outputs (to DOT, FA format).
 
     Keyword arguments:
     params -- Parameters of the program (console).
-    parser -- WFA parser.
     out_name -- Filename of the result PA.
     fa_file -- Filename of the result PA support.
     dot_supp_file -- Filename of the result PA support converted to DOT.
@@ -189,7 +188,7 @@ def handle_dots(params, parser, out_name, fa_file, dot_supp_file, dot_prob_file,
         handle_support(out_name, fa_file, dot_supp_file, fa)
 
     if params.prob:
-        handle_prob(parser, out_name, dot_prob_file)
+        handle_prob(params, fa, out_name, dot_prob_file)
 
 
 def handle_support(out_name, fa_file, dot_supp_file, fa):
@@ -216,7 +215,7 @@ def handle_support(out_name, fa_file, dot_supp_file, fa):
         print "Transforming .dot file to .png image ... "
         os.system("dot -Tpng {0}-Supp.dot -o {1}-Supp.png".format(out_name, out_name))
 
-def handle_prob(parser, out_name, dot_prob_file):
+def handle_prob(params, aut, out_name, dot_prob_file):
     """Handle the output of the PA (saving to a file).
 
     Keyword arguments:
@@ -225,8 +224,9 @@ def handle_prob(parser, out_name, dot_prob_file):
     dot_prob_file -- Filehandler for the export to the DOT format.
     """
     print "Converting PFA to .dot format ... "
-    aut = parser.treba_to_wfa("{0}.fsm".format(out_name))
-    dot_prob_file.write(aut.to_dot())
+    legend = "#States: {0}\n#Packets: {1}\nAlpha: {2}\nt0: {3}\nFile: {4}".format(len(aut.get_states()), MAXPACKETS, ALPHA, T0, params.pcap)
+
+    dot_prob_file.write(aut.to_dot(True, None, legend))
     dot_prob_file.close()
     print "Transforming .dot file to .png image ... "
     os.system("dot -Tpng {0}-Prob.dot -o {1}-Prob.png".format(out_name, out_name))
@@ -266,7 +266,8 @@ def write_obs_file(reader, out_file):
                     #     print p.sprintf("{Raw:%Raw.load%}\n")
                     #.
                     #print(aux.convert_to_pritable(p.getlayer(Raw).load))
-                    out_file.write(convert_to_treba_obs(p.getlayer(Raw).load) + "\n")
+                    #print aux.convert_to_pritable(p.getlayer(Raw).load)
+                    out_file.write(convert_to_treba_obs(p.getlayer(Raw).load[0:30]) + "\n")
                     packet_num += 1
         else:
             break

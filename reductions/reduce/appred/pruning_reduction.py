@@ -21,10 +21,12 @@ If not, see <http://www.gnu.org/licenses/>.
 """
 
 import copy
-import nfa
-import core_reduction
-import aux_functions as aux
+import operator
+import wfa.nfa as nfa
+import wfa.aux_functions as aux
 import pulp
+import appred.core_reduction as core_reduction
+import label.states_probabilities as states_probabilities
 
 class PruningReduction(core_reduction.CoreReduction):
     """Class for the pruning reduction.
@@ -32,6 +34,7 @@ class PruningReduction(core_reduction.CoreReduction):
     def __init__(self, pa, nfa_aut):
         super(PruningReduction, self).__init__(pa, nfa_aut)
         self._removed_finals = []
+        self.state_labels = states_probabilities.StatesProbabilities(pa, nfa_aut)
 
     def get_removed_finals(self):
         """All removed finals are saved. This method gets all removed finals.
@@ -39,6 +42,10 @@ class PruningReduction(core_reduction.CoreReduction):
         Return: List(State)
         """
         return self._removed_finals
+
+    def prepare(self):
+        self.state_labels = states_probabilities.StatesProbabilities(super(PruningReduction, self).get_pa(), super(PruningReduction, self).get_nfa())
+        super(PruningReduction, self).prepare()
 
     def get_states_label(self):
         """For each state q compute the set of final states reached by q.
@@ -65,7 +72,16 @@ class PruningReduction(core_reduction.CoreReduction):
         return states_label
 
 
-    def weight_function(self, states_label, states):
+    def compute_labels(self, approx, sparse=False):
+        """Compute state labels (backward probabilities).
+
+        Keyword arguments:
+        approx -- Compute the state labels approximately (Bool).
+        """
+        self.state_labels.compute_probs(sparse)
+
+    @staticmethod
+    def _weight_function(states_label, states):
         """Weight function (the number of states labeled by the subset of states).
 
         Return: Int
@@ -73,9 +89,10 @@ class PruningReduction(core_reduction.CoreReduction):
         states_label -- alpha label of each state (Dictionary: State -> set([State]))
         states -- the set of states as input of weight function
         """
-        return len(self.get_labeled_states(states_label, states))
+        return len(PruningReduction._get_labeled_states(states_label, states))
 
-    def get_labeled_states(self, states_label, states):
+    @staticmethod
+    def _get_labeled_states(states_label, states):
         """Get the set of states labeled with subset of the set states.
 
         Return: Set([States])
@@ -89,7 +106,7 @@ class PruningReduction(core_reduction.CoreReduction):
                 ret.add(state)
         return ret
 
-    def value_function(self, back_prob, states_label, states):
+    def _value_function(self, states_label, states):
         """Value function (the backward probabilities sum of states in the set states).
 
         Return: Float
@@ -98,6 +115,7 @@ class PruningReduction(core_reduction.CoreReduction):
         states -- The set of states (input of value function c)
         """
         ret = 0.0
+        back_prob = self.state_labels.get_labels()
         total_set = set([])
         for state in list(states):
             total_set = total_set.union(states_label[state])
@@ -105,7 +123,7 @@ class PruningReduction(core_reduction.CoreReduction):
             ret += back_prob[state]
         return ret
 
-    def compare_sets(self, set1, set2, states_label, back_prob):
+    def _compare_sets(self, set1, set2, states_label):
         """Comparison of final states subsets set1 >= set2 (first according to
         weight function, then according to value function).
 
@@ -114,19 +132,18 @@ class PruningReduction(core_reduction.CoreReduction):
         set1 -- First operand (subset of final states)
         set2 -- Second operand (subset of final states)
         states_label -- alpha label of each state (Dictionary: State -> set([State]))
-        back_prob -- Backward probability of each state (Dictionary: State -> Float)
         """
-        weight1 = self.weight_function(states_label, set1)
-        weight2 = self.weight_function(states_label, set2)
+        weight1 = PruningReduction._weight_function(states_label, set1)
+        weight2 = PruningReduction._weight_function(states_label, set2)
         if weight1 > weight2:
             return True
-        elif (weight1 == weight2) and (self.value_function(back_prob, states_label, set1)\
-            <= self.value_function(back_prob, states_label, set2)):
+        elif (weight1 == weight2) and (self._value_function(states_label, set1)\
+            <= self._value_function(states_label, set2)):
             return True
         else:
             return False
 
-    def compare_sets_error(self, set1, set2, states_label, back_prob):
+    def _compare_sets_error(self, set1, set2, states_label):
         """Comparison of final states subsets with respect to error.
 
         Return: Bool (True -- set1 >= set2, otherwise False)
@@ -134,19 +151,18 @@ class PruningReduction(core_reduction.CoreReduction):
         set1 -- First operand (subset of final states)
         set2 -- Second operand (subset of final states)
         states_label -- alpha label of each state (Dictionary: State -> set([State]))
-        back_prob -- Backward probability of each state (Dictionary: State -> Float)
         """
-        val1 = self.value_function(back_prob, states_label, set1)
-        val2 = self.value_function(back_prob, states_label, set2)
+        val1 = self._value_function(states_label, set1)
+        val2 = self._value_function(states_label, set2)
         if val1 < val2:
             return True
-        elif (val1 == val2) and self.weight_function(states_label, set1) \
-            >= self.weight_function(states_label, set2):
+        elif (val1 == val2) and PruningReduction._weight_function(states_label, set1) \
+            >= PruningReduction._weight_function(states_label, set2):
             return True
         else:
             return False
 
-    def k_reduction(self, back_prob, k):
+    def k_reduction(self, k):
         """k-reduction of input NFA (with respect to ration of #states of the
         reduced NFA and #states of the input NFA).
 
@@ -164,21 +180,19 @@ class PruningReduction(core_reduction.CoreReduction):
         final_subsets = aux.list_powerset(nfa_finals)
         states_label = self.get_states_label()
 
-        #print back_prob
-
         for M in final_subsets:
-            if (self.weight_function(states_label, M) <= W) \
-                and (self.compare_sets(M, V, states_label, back_prob)):
+            if (PruningReduction._weight_function(states_label, M) <= W) \
+                and (self._compare_sets(M, V, states_label)):
                 V = copy.deepcopy(M)
 
         state_set = set(nfa_states)
         self._removed_finals = list(V)
-        new_states = state_set.difference(self.get_labeled_states(states_label, V))
+        new_states = state_set.difference(PruningReduction._get_labeled_states(states_label, V))
         new_automaton = automaton.get_automata_restriction(new_states)
         new_automaton.__class__ = nfa.NFA
         return new_automaton
 
-    def k_reduction_modif(self, back_prob, k):
+    def k_reduction_modif(self, k):
         """k-reduction of input NFA (with respect to ration of #states of the
         reduced NFA and #states of the input NFA).
 
@@ -198,18 +212,18 @@ class PruningReduction(core_reduction.CoreReduction):
         states_label = self.get_states_label()
 
         for M in final_subsets:
-            if (self.weight_function(states_label, M) >= W) \
-                and (self.compare_sets_error(M, V, states_label, back_prob)):
+            if (PruningReduction._weight_function(states_label, M) >= W) \
+                and (self._compare_sets_error(M, V, states_label)):
                 V = copy.deepcopy(M)
 
         state_set = set(nfa_states)
         self._removed_finals = list(V)
-        new_states = state_set.difference(self.get_labeled_states(states_label, V))
+        new_states = state_set.difference(PruningReduction._get_labeled_states(states_label, V))
         new_automaton = automaton.get_automata_restriction(new_states)
         new_automaton.__class__ = nfa.NFA
         return new_automaton
 
-    def eps_reduction(self, back_prob, eps):
+    def eps_reduction(self, eps):
         """eps-reduction of input NFA. The maximal error (probabilistic distance
         of input and reduced NFA) must be less or equal to eps.
 
@@ -227,18 +241,18 @@ class PruningReduction(core_reduction.CoreReduction):
         states_label = self.get_states_label()
 
         for M in final_subsets:
-            if (self.value_function(back_prob, states_label, M) <= W) \
-                and (self.compare_sets(M, V, states_label, back_prob)):
+            if (self._value_function(states_label, M) <= W) \
+                and (self._compare_sets(M, V, states_label)):
                 V = copy.deepcopy(M)
 
         state_set = set(nfa_states)
         self._removed_finals = list(V)
-        new_states = state_set.difference(self.get_labeled_states(states_label, V))
+        new_states = state_set.difference(PruningReduction._get_labeled_states(states_label, V))
         new_automaton = automaton.get_automata_restriction(new_states)
         new_automaton.__class__ = nfa.NFA
         return new_automaton
 
-    def eps_reduction_lp(self, back_prob, sub_automata, eps):
+    def eps_reduction_lp(self, sub_automata, eps):
         """The relaxed eps-reduction of the input NFA. The maximal error
         (probabilistic distance of input and reduced NFA) must be less or
         equal to eps. For computing integer linear programming is used.
@@ -255,8 +269,8 @@ class PruningReduction(core_reduction.CoreReduction):
         constraint = []
         for aut in sub_automata:
             sub_finals = set(aut.get_finals())
-            val.append(self.weight_function(states_label, sub_finals))
-            constraint.append(self.value_function(back_prob, states_label, sub_finals))
+            val.append(PruningReduction._weight_function(states_label, sub_finals))
+            constraint.append(self._value_function(states_label, sub_finals))
 
         sub_vars = range(0,len(sub_automata))
         variables = pulp.LpVariable.dicts('sub', sub_vars, lowBound = 0, upBound = 1,\
@@ -268,8 +282,6 @@ class PruningReduction(core_reduction.CoreReduction):
         reduction_model += sum([constraint[sub] * variables[sub] for sub in sub_vars]) <= eps,\
             "Maximal_error"
 
-        #print reduction_model
-
         reduction_model.solve()
 
         remove_states = set()
@@ -279,12 +291,13 @@ class PruningReduction(core_reduction.CoreReduction):
 
         self._removed_finals = list(remove_states)
         state_set = set(automaton.get_states())
-        new_states = state_set.difference(self.get_labeled_states(states_label, remove_states))
+        new_states = state_set.difference(PruningReduction._get_labeled_states(states_label, remove_states))
         new_automaton = automaton.get_automata_restriction(new_states)
         new_automaton.__class__ = nfa.NFA
         return new_automaton
 
-    def k_reduction_lp(self, back_prob, sub_automata, k, max_iter=100):
+
+    def k_reduction_lp(self, sub_automata, k, max_iter=100):
         """The relaxed k-reduction of the input NFA (with respect to ratio
         of #states of the reduced NFA and #states of the input NFA) For
         computing integer linear programming is used.
@@ -296,17 +309,18 @@ class PruningReduction(core_reduction.CoreReduction):
         k -- The ratio of number of states.
         max_iter -- Maximum number of iterations (improvements).
         """
+
         states_label = self.get_states_label()
         automaton = super(PruningReduction, self).get_nfa()
-        aut_states = automaton.get_states()
+        #aut_states = automaton.get_states()
 
-        W = (1-k)*len(aut_states)
+        #W = (1-k)*len(automaton.get_states())
         val = []
         constraint = []
         for aut in sub_automata:
-            sub_finals = set(aut.get_finals())
-            val.append(self.weight_function(states_label, sub_finals))
-            constraint.append(self.value_function(back_prob, states_label, sub_finals))
+            #sub_finals = set(aut.get_finals())
+            val.append(PruningReduction._weight_function(states_label, set(aut.get_finals())))
+            constraint.append(self._value_function(states_label, set(aut.get_finals())))
 
         sub_vars = range(0,len(sub_automata))
         variables = pulp.LpVariable.dicts('sub', sub_vars, lowBound = 0, upBound = 1,\
@@ -315,14 +329,12 @@ class PruningReduction(core_reduction.CoreReduction):
         #Objective function
         reduction_model += pulp.lpSum([val[sub] * variables[sub] for sub in sub_vars])
         #Constraints
-        reduction_model += pulp.lpSum([val[sub] * variables[sub] for sub in sub_vars]) <= W,\
+        reduction_model += pulp.lpSum([val[sub] * variables[sub] for sub in sub_vars]) <= (1-k)*len(automaton.get_states()),\
             "Maximal_states_removing"
 
         feasible = []
         counter = 0
         while counter < max_iter:
-            #print reduction_model
-            #sys.stdin.readline()
 
             reduction_model.solve()
             counter += 1
@@ -348,12 +360,11 @@ class PruningReduction(core_reduction.CoreReduction):
 
         self._removed_finals = list(remove_states)
         state_set = set(automaton.get_states())
-        new_states = state_set.difference(self.get_labeled_states(states_label, remove_states))
-        new_automaton = automaton.get_automata_restriction(new_states)
+        new_automaton = automaton.get_automata_restriction(state_set.difference(PruningReduction._get_labeled_states(states_label, remove_states)))
         new_automaton.__class__ = nfa.NFA
         return new_automaton
 
-    def k_reduction_lp_modif(self, back_prob, sub_automata, k):
+    def k_reduction_lp_modif(self, sub_automata, k):
         """The modified relaxed k-reduction of the input NFA (with respect to ratio
         of #states of the reduced NFA and #states of the input NFA) For
         computing integer linear programming is used.
@@ -373,8 +384,8 @@ class PruningReduction(core_reduction.CoreReduction):
 
         for aut in sub_automata:
             sub_finals = set(aut.get_finals())
-            constraint.append(self.weight_function(states_label, sub_finals))
-            val.append(self.value_function(back_prob, states_label, sub_finals))
+            constraint.append(PruningReduction._weight_function(states_label, sub_finals))
+            val.append(self._value_function(states_label, sub_finals))
 
         sub_vars = range(0,len(sub_automata))
         variables = pulp.LpVariable.dicts('sub', sub_vars, lowBound = 0, upBound = 1,\
@@ -386,8 +397,6 @@ class PruningReduction(core_reduction.CoreReduction):
         reduction_model += sum([constraint[sub] * variables[sub] for sub in sub_vars]) >= W,\
             "Maximal_error"
 
-        #print reduction_model
-
         reduction_model.solve()
 
         remove_states = set()
@@ -397,7 +406,103 @@ class PruningReduction(core_reduction.CoreReduction):
 
         self._removed_finals = list(remove_states)
         state_set = set(automaton.get_states())
-        new_states = state_set.difference(self.get_labeled_states(states_label, remove_states))
+        new_states = state_set.difference(PruningReduction._get_labeled_states(states_label, remove_states))
         new_automaton = automaton.get_automata_restriction(new_states)
         new_automaton.__class__ = nfa.NFA
         return new_automaton
+
+    def k_reduction_greedy(self, k):
+        weight = self.state_labels.get_labels()
+        sorted_weight = sorted(weight.items(), key=operator.itemgetter(1))
+
+        aut = super(PruningReduction, self).get_nfa()
+        states = set(aut.get_states())
+        lim = k*len(states)
+        v_set = set()
+        index = 0
+
+        graph = aut.get_oriented_graph()
+        graph.__class__ = nfa.NFA
+        index = len(sorted_weight) - 1
+
+        while index >= 0:
+            item = sorted_weight[index]
+            index -= 1
+
+            item_set = set([item[0]])
+
+            e_prime, ret = PruningReduction._pruning_red_states(graph, states - v_set.union(item_set), states)
+            e = e_prime
+
+            if e <= lim:
+                v_set = v_set.union(item_set)
+
+        _, new_states = self._compute_error(aut, states, states - v_set)
+        self._removed_finals = new_states
+        return aut.get_automata_restriction(v_set).get_trim_automaton()
+
+    def eps_reduction_greedy(self, eps):
+        prob = self.state_labels.get_labels()
+        sorted_prob = sorted(prob.items(), key=operator.itemgetter(1))
+        aut = super(PruningReduction, self).get_nfa()
+        states = set(aut.get_states())
+        #count_states = len(states)
+        v_set = set()
+        #err = 0
+        index = 0
+        self._removed_finals = set()
+
+        graph = aut.get_oriented_graph()
+        graph.__class__ = nfa.NFA
+
+        while index < len(sorted_prob):
+            item = sorted_prob[index]
+            index += 1
+
+            item_set = set([item[0]])
+
+            e, sts = self._compute_error(graph, states, v_set.union(item_set))
+            if e <= eps:
+                v_set = sts
+
+        _, new_states = self._compute_error(aut, states, v_set)
+        self._removed_finals = new_states
+        return aut.get_automata_restriction(states - v_set).get_trim_automaton()
+
+    def _compute_error(self, aut, all_states,  pr_states):
+        change = True
+        sts = pr_states
+        prob = self.state_labels.get_labels()
+        err = 0.0
+
+        while change:
+            change = False
+            for item in iter(sts):
+                _, new_states = PruningReduction._pruning_red_states(aut, sts - set([item]), all_states)
+                if item not in new_states:
+                    sts = sts - set([item])
+                    change = True
+                    break
+
+        for s in iter(sts):
+            err += prob[s]
+        print err
+        return err, sts
+
+    @staticmethod
+    def _pruning_red_states(graph, pr_states, all_states):
+        """Optimized procedure counting the states after adding self-loops.
+
+        Return: Int (number of states after adding self-loops).
+        Keyword arguments:
+        sl_states -- set(state), states where self-loops are added.
+        """
+        # aut = super(SelfLoopReduction, self).get_nfa()
+        initials = set(graph.get_starts().keys())
+        graph_prime = graph.get_automata_restriction(all_states - pr_states)
+        sts = graph_prime.get_coaccessible_states() & graph_prime.get_accessible_states()
+
+        if sts & initials == set([]):
+            return len(sts) + 1, sts
+        else:
+            return len(sts), sts

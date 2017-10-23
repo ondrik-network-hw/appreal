@@ -1,0 +1,7 @@
+/^POST \S* HTTP\/[01]\.[019]\r\n(\V+\r\n)*\r\n[\x00-\xff]*DROP TABLE[\x00-\xff]*/
+/^HTTP\/[01]\.[019] 404[\x00-\xff]*(admin|wordpress)[\x00-\xff]*/
+/^POST \S* HTTP\/[01]\.[019]\r\n(\V+\r\n)*\r\n[\x00-\xff]*admin:admin[\x00-\xff]*/
+/^POST \S* HTTP\/[01]\.[019]\r\n(\V+\r\n)*\r\n[\x00-\xff]*admin:password[\x00-\xff]*/
+/^POST \S* HTTP\/[01]\.[019]\r\n(\V+\r\n)*\r\n[\x00-\xff]*YWRtaW46cGFzc3dvcmQ[\x00-\xff]*/
+/^POST \S* HTTP\/[01]\.[019]\r\n(\V+\r\n)*\r\n[\x00-\xff]*YWRtaW46YWRtaW4[\x00-\xff]*/
+/^POST \S* HTTP\/[01]\.[019]\r\n(\V+\r\n)*\r\n[\x00-\xff]*\/bin\/sh[\x00-\xff]*/

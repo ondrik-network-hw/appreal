@@ -23,12 +23,12 @@ If not, see <http://www.gnu.org/licenses/>.
 import sys
 import getopt
 
-import nfa_parser
-import wfa_parser
-import core_parser
-import matrix_wfa
+import parser.nfa_parser as nfa_parser
+import parser.wfa_parser as wfa_parser
+import parser.core_parser as core_parser
+import wfa.matrix_wfa as matrix_wfa
 
-import scipy.io
+#import scipy.io
 
 HELP = "Program for computing the product of PA and NFA.\n"\
         "-p aut -- Input probabilistic automaton in Treba format.\n"\
@@ -112,25 +112,18 @@ def main():
         print HELP
         sys.exit(0)
 
-    parser_nfa = nfa_parser.NFAParser()
-    parser_wfa = wfa_parser.WFAParser()
-
     input_nfa = None
     proab_aut = None
 
     try:
-        input_nfa = parser_nfa.fa_to_nfa(params.input_nfa)
-        proab_aut = parser_wfa.treba_to_wfa(params.probmat)
+        input_nfa = nfa_parser.NFAParser.fa_to_nfa(params.input_nfa)
+        proab_aut = wfa_parser.WFAParser.treba_to_wfa(params.probmat)
     except IOError as exc:
         sys.stderr.write("I/O error: {0}\n".format(exc.strerror))
         sys.exit(1)
     except core_parser.AutomataParserException as exc:
         sys.stderr.write("Error during parsing NFA or PA: {0}\n"\
             .format(exc.msg))
-        sys.exit(1)
-    except Exception as exc:
-        sys.stderr.write("Error during parsing input files: {0}\n"\
-            .format(exc.message))
         sys.exit(1)
 
     proab_aut = proab_aut.get_trim_automaton()

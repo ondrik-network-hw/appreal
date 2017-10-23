@@ -23,15 +23,18 @@ If not, see <http://www.gnu.org/licenses/>.
 import sys
 import getopt
 
-import nfa_parser
-import core_parser
-import nfa
+import parser.nfa_parser as nfa_parser
+import parser.core_parser as core_parser
+import wfa.nfa as nfa
+import wfa.nfa_export as nfa_export
+
+MSFM_PREPROC = True
 
 HELP = "Program for converting NFAs.\n"\
         "-i file -- Input NFA file.\n"\
         "-f format (fa, ba, timbuk) -- Input NFA format (default FA format).\n"\
         "-o file -- Output NFA file.\n"\
-        "-t format (fa, ba, timbuk, fado, dot) -- Output NFA format.\n"\
+        "-t format (fa, ba, timbuk, fado, dot, vtf, msfm) -- Output NFA format.\n"\
         "-h -- Show this text."
 
 class FormatParams:
@@ -64,9 +67,9 @@ class FormatParams:
                 self.output_aut = arg
             elif o == "-h":
                 self.help = True
-            elif o == "-f" and arg in ("fa", "fado", "timbuk"):
+            elif o == "-f" and arg in ("fa", "fado", "timbuk", "ba"):
                 self.input_format = arg
-            elif o == "-t" and arg in ("fa", "ba", "dot", "fado", "timbuk"):
+            elif o == "-t" and arg in ("fa", "ba", "dot", "fado", "timbuk", "vtf", "msfm"):
                 self.output_format = arg
             else:
                 self.error = True
@@ -95,20 +98,25 @@ def main():
         print(HELP)
         sys.exit(0)
 
-    parser_nfa = nfa_parser.NFAParser()
-
-    input_nfa = import_nfa(parser_nfa, params.input_aut, params.input_format)
-    input_nfa.__class__ = nfa.NFA
+    input_nfa = import_nfa(params.input_aut, params.input_format)
+    input_nfa.__class__ = nfa_export.NFAExport
     export_nfa(input_nfa, params.output_aut, params.output_format)
 
 
-def import_nfa(parser, input_file, input_format):
+def import_nfa(input_file, input_format):
+    """Import NFA from input file according to input format.
+
+    Return: NFA
+    Keyword arguments:
+    input_file -- File handler with stored NFA.
+    input_format -- Format of the stored NFA.
+    """
     input_nfa = None
     try:
         if input_format == "fa":
-            input_nfa = parser.fa_to_nfa(input_file)
+            input_nfa = nfa_parser.NFAParser.fa_to_nfa(input_file)
         elif input_format == "ba":
-            input_nfa = parser.ba_to_nfa(input_file)
+            input_nfa = nfa_parser.NFAParser.ba_to_nfa(input_file)
         #TODO: import from Timbuk format
     except IOError as e:
         sys.stderr.write("I/O error: {0}\n".format(e.strerror))
@@ -116,24 +124,32 @@ def import_nfa(parser, input_file, input_format):
     except core_parser.AutomataParserException as e:
         sys.stderr.write("Error during parsing the input NFA: {0}\n".format(e.msg))
         sys.exit(1)
-    except Exception as e:
-        sys.stderr.write("Error during parsing input files: {0}\n".format(e.message))
-        sys.exit(1)
     return input_nfa
 
 
 def export_nfa(input_nfa, out_file, format_aut):
+    """Export NFA to given file with a given format.
+
+    Keyword arguments:
+    input_nfa -- NFA to store.
+    out_file -- Filename where the NFA is stored
+    format_aut -- Format of the exported NFA.
+    """
     try:
         fhandle = open(out_file, 'w')
         if format_aut == "fa":
             fhandle.write(input_nfa.to_fa_format())
         elif format_aut == "ba":
-            #TODO: Implement export to BA format
-            pass
+            fhandle.write(input_nfa.to_ba())
         elif format_aut == "fado":
             fhandle.write(input_nfa.to_automata_fado_format())
         elif format_aut == "dot":
             fhandle.write(input_nfa.to_dot())
+        elif format_aut == "vtf":
+            fhandle.write(input_nfa.to_vtf())
+        elif format_aut == "msfm":
+            input_nfa.rename_states()
+            fhandle.write(input_nfa.to_msfm(MSFM_PREPROC))
         else:
             fhandle.write(input_nfa.to_timbuk())
         fhandle.close()

@@ -24,19 +24,24 @@ import sys
 import getopt
 import pickle
 
-import nfa_parser
-import wfa_parser
-import core_parser
-import core_reduction
-import nfa
-import matrix_wfa
-import selfloop_reduction
+import parser.nfa_parser as nfa_parser
+import parser.wfa_parser as wfa_parser
+import parser.core_parser as core_parser
+import wfa.nfa as nfa
+import wfa.nfa_export as nfa_export
+import wfa.matrix_wfa as matrix_wfa
+import label.states_weights as states_weights
+import label.states_probabilities as states_probabilities
 
 SUBFILE = "sub"
 WEIGHTFILE = "weight"
 PROBFILE = "prob"
 CLOSUREMODE = matrix_wfa.ClosureMode.inverse
-APPROXIMATE = True
+ITERATIONS = 100
+APPROXIMATE = False
+WEIGHT_TYPE = states_weights.LabelType.prob_sigma
+#Sparse matrix representation
+SPARSE = True
 
 HELP = "Program for dividing NFA into subautomata, and computing state weights and probabilities.\n"\
         "-p aut -- Input probabilistic automaton in Treba format.\n"\
@@ -116,6 +121,7 @@ def divide_automaton(input_nfa, directory):
     subautomata = input_nfa.get_branch_subautomata()
     try:
         for automaton in subautomata:
+            automaton.__class__ = nfa_export.NFAExport
             substates += len(automaton.get_states())
             fhandle = open("{0}/{1}{2}".format(directory, SUBFILE, i), 'w')
             fhandle.write(automaton.to_fa_format())
@@ -128,7 +134,7 @@ def divide_automaton(input_nfa, directory):
     print("Original automaton states: {0}".format(len(input_nfa.get_states())))
     print("Subautomata states sum: {0}".format(substates))
 
-def compute_weights(pa, start, directory, approx=False, iters=0):
+def save_weights(pa, input_nfa, start, directory, approx=False):
     """Compute weights for all subautomata stored in files. Results are
     stored in a file.
 
@@ -139,36 +145,36 @@ def compute_weights(pa, start, directory, approx=False, iters=0):
     iters -- Max number of iterations (if iterative closure computation is used).
     """
     i = start
-    parser_nfa = nfa_parser.NFAParser()
 
-    if not selfloop_reduction.SelfLoopReduction(pa, nfa.NFA()).is_pa_valid():
-        raise Exception("Bad input PA")
+    #all_labels = states_weights.StatesWeights(pa, input_nfa, WEIGHT_TYPE)
+    # all_labels.prepare()
+    lang = 0.0
 
     while True:
         try:
-            aut = parser_nfa.fa_to_nfa("{0}/{1}{2}".format(directory, SUBFILE, i))
-            reduction = core_reduction.CoreReduction(pa, aut)
+            aut = nfa_parser.NFAParser.fa_to_nfa("{0}/{1}{2}".format(directory, SUBFILE, i))
+            labels = states_weights.StatesWeights(pa, aut, WEIGHT_TYPE)
+            labels.prepare()
 
-            if approx:
-                print "Computing approximate state labels of NFA {0}".format(i)
-                back_prob = reduction.get_states_weight_subautomaton_approximate(CLOSUREMODE, True, iters)
-            else:
-                if reduction.get_nfa().is_unambiguous():
-                    print("Unambiguous NFA {0}, computing product.".format(i))
-                    back_prob = reduction.get_states_weight_product(CLOSUREMODE, iters)
-                else:
-                    print("Not unambiguous NFA {0}, computing subautomata.".format(i))
-                    back_prob = reduction.get_states_weight_subautomaton(CLOSUREMODE, True, iters)
+            # if i == 1:
+            #     print "Computing language probability"
+            #     lang = all_labels.get_nfa_prob(CLOSUREMODE, SPARSE, ITERATIONS)
+
+            print "Processing automaton {0}".format(i)
+            labels.compute_weights(approx, SPARSE)
+
+
+            #labels.get_labels()["lang"] = lang
+            #print labels.get_labels()
 
             with open("{0}/{1}{2}".format(directory, WEIGHTFILE, i), 'wb') as f:
-                pickle.dump(back_prob, f, pickle.HIGHEST_PROTOCOL)
+                pickle.dump(labels.get_labels(), f, pickle.HIGHEST_PROTOCOL)
 
             i += 1
-            #return
         except IOError:
             return
 
-def compute_probabilities(pa, start, directory, iters=0):
+def save_probabilities(pa, start, directory):
     """Compute probabilities for all subautomata stored in files. Results
     are stored in a file.
 
@@ -179,21 +185,20 @@ def compute_probabilities(pa, start, directory, iters=0):
     iters -- Max number of iterations (if iterative closure computation is used).
     """
     i = start
-    parser_nfa = nfa_parser.NFAParser()
 
     while True:
         try:
-            aut = parser_nfa.fa_to_nfa("{0}/{1}{2}".format(directory, SUBFILE, i))
-            reduction = core_reduction.CoreReduction(pa, aut)
+            aut = nfa_parser.NFAParser.fa_to_nfa("{0}/{1}{2}".format(directory, SUBFILE, i))
+            labels = states_probabilities.StatesProbabilities(pa, aut)
+            labels.prepare()
 
-            if reduction.get_nfa().is_unambiguous():
-                print("Unambiguous NFA {0}, computing product.".format(i))
-                back_prob = reduction.get_finals_prob_product(CLOSUREMODE, iters)
-            else:
-                print("Not unambiguous NFA {0}, computing subautomata.".format(i))
-                back_prob = reduction.get_finals_prob_subautomaton(CLOSUREMODE, True, iters)
+            print "Processing automaton {0}".format(i)
+            labels.compute_probs(SPARSE)
+
+            #print labels.get_labels()
+
             with open("{0}/{1}{2}".format(directory, PROBFILE, i), 'wb') as f:
-                pickle.dump(back_prob, f, pickle.HIGHEST_PROTOCOL)
+                pickle.dump(labels.get_labels(), f, pickle.HIGHEST_PROTOCOL)
             i += 1
         except IOError:
             return
@@ -210,46 +215,35 @@ def main():
         print(HELP)
         sys.exit(0)
 
-    parser_nfa = nfa_parser.NFAParser()
-    parser_wfa = wfa_parser.WFAParser()
-
-    print(params.pa)
+    #print(params.pa)
 
     input_nfa = None
     pa = None
 
     try:
-        input_nfa = parser_nfa.fa_to_nfa(params.input_nfa)
-        pa = parser_wfa.treba_to_wfa(params.pa)
+        input_nfa = nfa_parser.NFAParser.fa_to_nfa(params.input_nfa)
+        pa =  wfa_parser.WFAParser.treba_to_wfa(params.pa)
     except IOError as e:
         sys.stderr.write("I/O error: {0}\n".format(e.strerror))
         sys.exit(1)
     except core_parser.AutomataParserException as e:
         sys.stderr.write("Error during parsing NFA or WFA: {0}\n".format(e.msg))
         sys.exit(1)
-    except Exception as e:
-        sys.stderr.write("Error during parsing input files: {0}\n".format(e.message))
-        sys.exit(1)
 
     input_nfa = input_nfa.get_trim_automaton()
     #input_nfa.rename_states()
     input_nfa.__class__ = nfa.NFA
 
-    pa = pa.get_trim_automaton()
-    pa.rename_states()
+    #pa = pa.get_trim_automaton()
+    #pa.rename_states()
     pa.__class__ = matrix_wfa.MatrixWFA
 
-    try:
-        if params.mode == "divide":
-            divide_automaton(input_nfa, params.directory)
-        elif params.mode == "weight":
-            compute_weights(pa, params.start, params.directory, APPROXIMATE, params.iterations)
-        elif params.mode == "probability":
-            compute_probabilities(pa, params.start, params.directory, params.iterations)
-    except Exception as e:
-        sys.stderr.write("{0}\n".format(e.message))
-        sys.stderr.flush()
-        sys.exit(1)
+    if params.mode == "divide":
+        divide_automaton(input_nfa, params.directory)
+    elif params.mode == "weight":
+        save_weights(pa, input_nfa, params.start, params.directory, APPROXIMATE)
+    elif params.mode == "probability":
+        save_probabilities(pa, params.start, params.directory)
 
 
 if __name__ == "__main__":

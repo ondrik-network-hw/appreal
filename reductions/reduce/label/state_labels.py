@@ -20,13 +20,14 @@ You should have received a copy of the GNU General Public License.
 If not, see <http://www.gnu.org/licenses/>.
 """
 
-import nfa
-import matrix_wfa
-import approximate_nfa_reachability
-import wfa_exceptions
+import wfa.nfa as nfa
+import wfa.matrix_wfa as matrix_wfa
+import wfa.nfa_export as nfa_export
+import wfa.core_wfa_export as core_wfa_export
+import label.approximate_nfa_reachability as approximate_nfa_reachability
 
-class CoreReduction(object):
-    """Base class for operations used for NFA reductions.
+class StateLabels(object):
+    """Base class for computing the state labels.
     """
 
     def __init__(self, pa, i_nfa):
@@ -40,30 +41,59 @@ class CoreReduction(object):
         self.pa.__class__ = matrix_wfa.MatrixWFA
         self.nfa = i_nfa
         self.nfa.__class__ = nfa.NFA
+        self.labels = dict()
 
     def get_nfa(self):
-        """Get a stored NFA (input for a reduction). Return NFA.
+        """Get a stored NFA (input for a reduction).
+
+        Return: NFA.
         """
         return self.nfa
+
+    def set_nfa(self, aut):
+        """Set the used NFA.
+
+        Keyword arguments:
+        aut -- NFA.
+        """
+        self.nfa = aut
 
     def get_pa(self):
         """Get a stored PA (input for a reduction). Return MatrixWFA.
         """
         return self.pa
 
+    def set_pa(self, aut):
+        """Set the used probabilistic automaton.
+
+        Keyword arguments:
+        aut -- PA.
+        """
+        self.pa = aut
+
+    def get_labels(self):
+        """Get the state labels
+
+        Return: State labels, Dict: State -> Float.
+        """
+        return self.labels
+
+    def set_labels(self, lab):
+        """Set the state labels.
+
+        Keyword arguments:
+        lab -- New state labels, Dict: State -> Float.
+        """
+        self.labels = lab
+
     def prepare(self):
         """Make a preparation for reduction (trimming input automata,
         rename their states). Return void.
         """
-        self.pa = self.pa.get_trim_automaton()
-        self.pa.rename_states()
-        self.pa.__class__ = matrix_wfa.MatrixWFA
 
-        self.nfa = self.nfa.get_trim_automaton()
-        self.nfa.rename_states()
-        self.nfa.__class__ = nfa.NFA
+        self.labels = dict()
 
-    def get_finals_prob_subautomaton(self, closure_mode, check_unambiguity, iterations=0):
+    def get_finals_prob_subautomaton(self, closure_mode, check_unambiguity, sparse=False, iterations=0):
         """Get backward language probabilities for each final state of NFA (f_P(L^{-1}(q))).
         Concrete probabilities are computed using subautomaton method. For each
         final state the automaton accepting L^{-1}(q) is created (using BFS as in
@@ -83,21 +113,28 @@ class CoreReduction(object):
         for final, _  in self.nfa.get_finals().iteritems():
             language_sum[final] = 0
 
+        print self.nfa.get_finals()
+
         for final, _  in self.nfa.get_finals().iteritems():
+            print final
             back = self.nfa.get_backward_nfa(final).get_trim_automaton()
             back.__class__ = nfa.NFA
             if check_unambiguity:
                 if not back.is_unambiguous():
-                    back = back.get_unambiguous_nfa().get_trim_automaton()
+                    back = back.get_dfa()
+                    back.rename_states()
+                    back = back.get_trim_automaton()
+                    back.__class__ = nfa.NFA
+                    back = back.get_minimal_dfa_hopcroft()
 
             wfa_back = self.pa.product(back)
             wfa_back = wfa_back.get_trim_automaton()
             wfa_back.rename_states()
             wfa_back.__class__ = matrix_wfa.MatrixWFA
-            language_sum[final] = wfa_back.compute_language_probability(closure_mode, iterations)
+            language_sum[final] = wfa_back.compute_language_probability(closure_mode, sparse, iterations)
         return language_sum
 
-    def get_finals_prob_product(self, closure_mode, iterations=0):
+    def get_finals_prob_product(self, closure_mode, sparse=False, iterations=0):
         """Get backward language probabilities for each final state of NFA (f_P(L^{-1}(q))).
         Concrete probabilities are computed using product method. Assumes that
         input NFA is UFA. Product PA with whole input NFA is performed.
@@ -110,14 +147,18 @@ class CoreReduction(object):
                         iterative multiplication ....)
         iterations -- number of iterations in the case of iterative multiplication closure_mode
         """
+
+        #TODO: Not compatible with sparse matrices (does not support indexing)
         wfa_p1 = self.pa.product(self.nfa)
         wfa_p1 = wfa_p1.get_trim_automaton()
         wfa_p1.rename_states()
         wfa_p1.__class__ = matrix_wfa.MatrixWFA
 
-        pa_ini = self.pa.get_initial_vector()
-        pa_fin = self.pa.get_final_vector()
-        closure = wfa_p1.compute_transition_closure(closure_mode, iterations)
+        #print "WARNING -- prob product"
+
+        pa_ini = self.pa.get_initial_vector(sparse)
+        pa_fin = self.pa.get_final_vector(sparse)
+        closure = wfa_p1.compute_transition_closure(closure_mode, sparse, iterations)
 
         language_sum = {}
         finals = self.nfa.get_finals().keys()
@@ -135,7 +176,7 @@ class CoreReduction(object):
         return language_sum
 
 
-    def get_states_weight_subautomaton(self, closure_mode, check_unambiguity, iterations=0):
+    def get_states_weight_subautomaton(self, closure_mode, check_unambiguity, sparse=False, iterations=0):
         """Get backward language weights for each final state of NFA (weight_P(L^{-1}(q))).
         Concrete weights are computed using subautomaton method. For each
         state the automaton accepting L^{-1}(q) is created (using BFS as in
@@ -157,27 +198,71 @@ class CoreReduction(object):
             language_sum[state] = 0
 
         for state in states:
-            #print state
+
             back = self.nfa.get_backward_nfa(state).get_trim_automaton()
             back.__class__ = nfa.NFA
             if check_unambiguity:
                 if not back.is_unambiguous():
-                    back = back.get_unambiguous_nfa().get_trim_automaton()
-                    #print "unambiguous", state, len(back.get_states())
+                    back = back.get_dfa().get_trim_automaton()
 
-            #print "product start"
             wfa_back = self.pa.product(back)
-            #print "product completed"
             wfa_back = wfa_back.get_trim_automaton()
             wfa_back.rename_states()
-            #print "trimmed completed"
             wfa_back.__class__ = matrix_wfa.MatrixWFA
-            language_sum[state] = wfa_back.compute_language_weight(closure_mode, iterations)
+            language_sum[state] = wfa_back.compute_language_weight(closure_mode, sparse, iterations)
 
         return language_sum
 
 
-    def get_states_weight_subautomaton_approximate(self, closure_mode, check_unambiguity, iterations=0):
+    def get_states_prob_sigma(self, closure_mode, check_unambiguity, sparse=False, iterations=0):
+        """Get probability of accepting L^{-1}(q).Sigma^* for each state.
+
+        Return: Dict: State -> float (the probability is assigned to each state).
+        Keyword arguments:
+        closure_mode -- Mode for computing the inverse.
+        check_unambiguity -- Check whether the NFA is unambiguous.
+        sparse -- Use sparse matrix representation.
+        iterations -- Number of iterations for the iterative inverse method.
+        """
+        language_sum = {}
+        states = self.nfa.get_states()
+        for state in states:
+            language_sum[state] = 0
+
+        #i = 1
+
+        for state in states:
+            # print "{0}/{1} -- {2}".format(i, len(states), state)
+            # i += 1
+
+            back = self.nfa.get_backward_nfa(state)
+            back.__class__ = nfa.NFA
+            # if len(set(back.get_alphabet())) != 256:
+            #     print "Error alphabet"
+
+            back.add_selfloop(set([state]))
+            back = back.get_trim_automaton()
+            back.__class__ = nfa.NFA
+
+            if check_unambiguity:
+                if not back.is_unambiguous():
+                    back = back.get_dfa()
+                    back.rename_states()
+                    back = back.get_trim_automaton()
+                    back.__class__ = nfa.NFA
+                    back = back.get_minimal_dfa_hopcroft()
+                    #back.rename_states()
+
+            wfa_back = self.pa.product(back)
+            wfa_back = wfa_back.get_trim_automaton()
+            wfa_back.rename_states()
+            wfa_back.__class__ = matrix_wfa.MatrixWFA
+            language_sum[state] = wfa_back.compute_language_probability(closure_mode, sparse, iterations)
+
+        return language_sum
+
+
+    def get_states_weight_subautomaton_approximate(self, closure_mode, check_unambiguity, sparse=False, iterations=0):
         """Approximately compute the weights of the NFA states (state labels).
 
         Return: Dictionary: State -> float (weight of each state)
@@ -189,43 +274,33 @@ class CoreReduction(object):
         """
         nfa_reach = approximate_nfa_reachability.ApproxNFAReach(self.pa, self.nfa)
 
-        try:
-            nfa_reach.prepare()
-            nfa_reach.process_states()
-        except wfa_exceptions.WFAOperationException as e:
-            if e.err_type == wfa_exceptions.WFAErrorType.not_DAG:
-                print "G(A) is not a DAG, approximation cannot be used."
-                return self.get_states_weight_subautomaton(closure_mode, check_unambiguity, iterations)
-            else:
-                raise
+        nfa_reach.prepare()
+        nfa_reach.process_states(sparse)
+
         return nfa_reach.get_language_sum()
 
-    def get_states_weight_product(self, closure_mode, iterations=0):
+    def get_states_weight_product(self, closure_mode, sparse=False, iterations=0):
         """Get backward language weights for each state of NFA (weight_P(L^{-1}(q))).
         Concrete weights are computed using product method. Assumes that
         input NFA is UFA. Product PA with whole input NFA is performed.
         Then the weihts are computed directly from transition
         matrix closure of the product automaton.
 
-        Return: Dictionary: Final state -> float
+        Return: Dictionary: State -> float
         Keyword arguments:
         closure_mode -- mode how to compute transition matrix closure (inverse matrix,
                         iterative multiplication ....)
         iterations -- number of iterations in the case of iterative multiplication closure_mode
         """
         aut = self.nfa
+        aut.set_all_finals()
         wfa_p1 = self.pa.product(aut)
         wfa_p1 = wfa_p1.get_trim_automaton()
         wfa_p1.rename_states()
         wfa_p1.__class__ = matrix_wfa.MatrixWFA
 
-        pa_ini = self.pa.get_initial_vector()
-        pa_fin = self.pa.get_final_ones()
-        closure = wfa_p1.compute_transition_closure(closure_mode, iterations)
-
-        for i in range(0, len(pa_fin)):
-            if pa_fin[0, i] != 1.0:
-                raise Exception("Debug error, all states must be final.")
+        pa_ini = self.pa.get_initial_vector(sparse)
+        closure = wfa_p1.compute_transition_closure(closure_mode, sparse, iterations)
 
         language_sum = {}
         for state in aut.get_states():
@@ -241,3 +316,29 @@ class CoreReduction(object):
                 language_sum[old1[1]] += pa_ini[0,old[0]] * closure[new, new1] #* pa_fin[0,old1[0]]
 
         return language_sum
+
+    def get_nfa_prob(self, mode, sparse, iterations):
+        """Get probability of the whole language of NFA.
+
+        Return: float
+        Keyword arguments:
+        closure_mode -- Mode for computing the inverse.
+        sparse -- Use sparse matrix representation.
+        iterations -- Number of iterations for the iterative inverse method.
+        """
+        aut = self.nfa
+        if not self.nfa.is_unambiguous():
+            aut = self.nfa.get_dfa()
+            aut.rename_states()
+            aut = aut.get_trim_automaton()
+            aut.__class__ = nfa.NFA
+            aut = aut.get_minimal_dfa_hopcroft()
+            #aut.rename_states()
+
+        print len(aut.get_states())
+
+        wfa_p1 = self.pa.product(aut)
+        wfa_p1 = wfa_p1.get_trim_automaton()
+        wfa_p1.rename_states()
+        wfa_p1.__class__ = matrix_wfa.MatrixWFA
+        return wfa_p1.compute_language_probability(mode, sparse, iterations, False)

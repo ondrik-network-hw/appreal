@@ -22,9 +22,10 @@ If not, see <http://www.gnu.org/licenses/>.
 """
 
 import copy
-import nfa
-import matrix_wfa
-import core_wfa
+import wfa.nfa as nfa
+import wfa.matrix_wfa as matrix_wfa
+import wfa.core_wfa as core_wfa
+import wfa.nfa_export as nfa_export
 import collections
 
 DIRECTORY = "subautomata"
@@ -77,29 +78,6 @@ class ApproxNFAReach(object):
             self._language_sum[state] = 0
         self._nfa_tr_dict = self._nfa.get_dictionary_transitions()
         self._pa_tr_dict = self._pa.get_dictionary_transitions()
-
-        # if load_sl_aut:
-        #     with open("{0}/{1}".format(DIRECTORY, SL_AUT_FILE), 'rb') as f:
-        #         self._sl_automata = pickle.load(f)
-        #     with open("{0}/{1}".format(DIRECTORY, SL_CLOSURE_FILE), 'rb') as f:
-        #         self._sl_closure = pickle.load(f)
-        # else:
-        #     self._sl_automata = {}
-        #     self._sl_closure = {}
-        #     for st in self._pa.get_states():
-        #         aut = copy.deepcopy(self._pa)
-        #         aut.set_start({st: 1.0})
-        #         aut = aut.get_trim_automaton()
-        #         aut.rename_states()
-        #         aut.__class__ = matrix_wfa.MatrixWFA
-        #         self._sl_automata[st] = aut
-        #         self._sl_closure[st] = aut.compute_transition_closure(CLOSURE_MODE, ITERATIONS)
-        #         #print st
-        #
-        #     with open("{0}/{1}".format(DIRECTORY, SL_AUT_FILE), 'wb') as f:
-        #         pickle.dump(self._sl_automata, f, pickle.HIGHEST_PROTOCOL)
-        #     with open("{0}/{1}".format(DIRECTORY, SL_CLOSURE_FILE), 'wb') as f:
-        #         pickle.dump(self._sl_closure, f, pickle.HIGHEST_PROTOCOL)
 
     def _get_pa_states_reachability(self, reach_wrap, lang_aggr, lang_weight):
         """Compute new PA state labels from the transition closure, initial and
@@ -201,18 +179,20 @@ class ApproxNFAReach(object):
         self._reachable_states[state] = lang_aggr
         self._language_sum[state] = lang_weight
 
+        #print state, lang_weight
 
-    def process_self_loop_state_approx(self, state, lang_aggr, lang_weight):
+
+    def process_self_loop_state_approx(self, state, sparse=False):
         """Compute approximate state labels of the PA for a state state of the NFA.
         It is assumed that the state state has self-loops (transitions from
         predecessors are ignored).
 
         Keyword arguments:
         state -- State of the NFA.
-        lang_aggr -- Current value of the PA state labels.
-        lang_weight -- Current state label of the NFA state (beta function).
         """
         loop_transitions = []
+        lang_aggr = dict()
+        lang_weight = 0.0
         for sym in self._nfa.get_alphabet():
             loop_transitions.append(core_wfa.Transition(state, state, sym, 1.0))
         loop_nfa = nfa.NFA(loop_transitions, {state: 1.0}, {state: 1.0})
@@ -228,34 +208,35 @@ class ApproxNFAReach(object):
         spa.__class__ = matrix_wfa.MatrixWFA
 
         #Get initial and final vectors and compute the transition closure
-        closure = spa.compute_transition_closure(CLOSURE_MODE, ITERATIONS)
-        wfa_wrap = WFAReachabilityWrap(spa, pa_copy.get_initial_vector(), spa.get_final_ones(), closure)
+        closure = spa.compute_transition_closure(CLOSURE_MODE, sparse, ITERATIONS)
+        wfa_wrap = WFAReachabilityWrap(spa, pa_copy.get_initial_vector(sparse), spa.get_final_ones(sparse), closure)
         lang_weight, lang_aggr = self._get_pa_states_reachability(wfa_wrap, lang_aggr, lang_weight)
 
         self._reachable_states[state] = lang_aggr
         self._language_sum[state] = lang_weight
 
 
-    def process_states(self):
+    def process_states(self, sparse=False):
         """Compute the state labels of all states of the NFA.
         """
         for state in self._nfa.topological_sort_states():
             predecessors = list(self._nfa.get_predecessors(state))
+
             if state in predecessors:
                 nfa_back = self._get_back_nfa(state, MAX_STATES)
                 if nfa_back is None:
                     self.process_branch_state(state, predecessors)
-                    self.process_self_loop_state_approx(state, dict(), self._language_sum[state])
+                    self.process_self_loop_state_approx(state, sparse)
                 else:
-                    self.process_backward_state(nfa_back, state)
+                    self.process_backward_state(nfa_back, state, sparse)
             elif len(predecessors) >= 1:
                 self.process_branch_state(state, predecessors)
             else:
                 nfa_back = self._get_back_nfa(state, None)
-                self.process_backward_state(nfa_back, state)
+                self.process_backward_state(nfa_back, state, sparse)
             #print state
 
-    def process_backward_state(self, nfa_back, state):
+    def process_backward_state(self, nfa_back, state, sparse=False):
         """Compute state labels of the PA for a state state of the NFA (using
         the subautomata method).
 
@@ -263,15 +244,17 @@ class ApproxNFAReach(object):
         nfa_back -- Backward NFA.
         state -- State of the NFA whose state labels are computed.
         """
+        nfa_back.set_all_finals()
         wfa_back = self._pa.product(nfa_back)
         wfa_back = wfa_back.get_trim_automaton()
         wfa_back.rename_states()
         wfa_back.__class__ = matrix_wfa.MatrixWFA
 
-        closure = wfa_back.compute_transition_closure(CLOSURE_MODE, ITERATIONS)
-        wfa_wrap = WFAReachabilityWrap(wfa_back, self._pa.get_initial_vector(), wfa_back.get_final_ones(), closure)
+        closure = wfa_back.compute_transition_closure(CLOSURE_MODE, sparse, ITERATIONS)
+        wfa_wrap = WFAReachabilityWrap(wfa_back, self._pa.get_initial_vector(sparse), wfa_back.get_final_ones(sparse), closure)
 
         lang_weight, lang_aggr = self._get_pa_states_reachability(wfa_wrap, dict(), 0.0)
 
         self._reachable_states[state] = lang_aggr
         self._language_sum[state] = lang_weight
+        #print self._reachable_states[state]

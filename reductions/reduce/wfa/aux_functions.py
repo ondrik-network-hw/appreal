@@ -62,8 +62,8 @@ def list_powerset(base_list):
     lst -- pattern (list) for the power list.
     """
     result = [[]]
-    for x in base_list:
-        result.extend([subset + [x] for subset in result])
+    for lst in base_list:
+        result.extend([subset + [lst] for subset in result])
     return result
 
 def merge_equivalence_classes(eq_class, item1, item2):

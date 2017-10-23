@@ -20,9 +20,9 @@ You should have received a copy of the GNU General Public License.
 If not, see <http://www.gnu.org/licenses/>.
 """
 
-from core_wfa import Transition
-from nfa import NFA
-from core_parser import AutomataParser, AutomataParserException
+from wfa.core_wfa import Transition
+from wfa.nfa import NFA
+from parser.core_parser import AutomataParser, AutomataParserException
 
 class NFAParser(AutomataParser):
     """Class for parsing NFAs to inner representation.
@@ -40,9 +40,10 @@ class NFAParser(AutomataParser):
         Keyword arguments:
         filename -- name of a file containing representation of an NFA.
         """
-        return self.fa_to_nfa(filename)
+        return NFAParser.fa_to_nfa(filename)
 
-    def parse_alphabet(self, line):
+    @staticmethod
+    def parse_alphabet(line):
         """Parse symbols of alphabet from a string.
 
         Return: List of symbols = alphabet.
@@ -56,7 +57,13 @@ class NFAParser(AutomataParser):
                 alph.add(int(item.strip(), 16))
         return alph
 
-    def ba_to_nfa(self, filename):
+    @staticmethod
+    def _parse_ba_state(state):
+        state = state.replace("[", "").replace("]", "")
+        return int(state)
+
+    @staticmethod
+    def ba_to_nfa(filename):
         """Parse NFA from BA format (Rabit&Reduce tool). Formely for Buchi automata.
         If fails raise AutomataParserException.
 
@@ -69,7 +76,7 @@ class NFAParser(AutomataParser):
         finals = dict()
 
         try:
-            start = int(fhandle.readline())
+            start = NFAParser._parse_ba_state(fhandle.readline())
         except EOFError:
             fhandle.close()
             raise AutomataParserException("Initial state must be specified.")
@@ -84,9 +91,9 @@ class NFAParser(AutomataParser):
                     spl2 = spl[1].split("->")
                     if len(spl2) != 2:
                         raise AutomataParserException("Bad input Format")
-                    transitions.append(Transition(int(spl2[0]), int(spl2[1]), ord(spl[0]), 1.0))
+                    transitions.append(Transition(NFAParser._parse_ba_state(spl2[0]), NFAParser._parse_ba_state(spl2[1]), NFAParser._parse_ba_state(spl[0]), 1.0))
                 elif len(spl) == 1:
-                    finals[int(spl[0])] = 1.0
+                    finals[NFAParser._parse_ba_state(spl[0])] = 1.0
                 else:
                     raise AutomataParserException("Bad input format.")
         except ValueError:
@@ -95,7 +102,8 @@ class NFAParser(AutomataParser):
         fhandle.close()
         return NFA(transitions, finals, {start: 1.0})
 
-    def fa_to_nfa(self, filename):
+    @staticmethod
+    def fa_to_nfa(filename):
         """Parse NFA from FA format (similar to Treba format).
         If fails raise AutomataParserException.
 
@@ -123,7 +131,7 @@ class NFAParser(AutomataParser):
             for line in fhandle:
                 if first:
                     if line.startswith(":"):
-                        alphabet = self.parse_alphabet(line[1:])
+                        alphabet = NFAParser.parse_alphabet(line[1:])
                         first = False
                         continue
                 first = False
@@ -133,6 +141,8 @@ class NFAParser(AutomataParser):
                     chars.add(int(spl[2], 16))
                 elif len(spl) == 1:
                     finals[int(spl[0])] = 1.0
+                elif len(spl) == 0:
+                    pass
                 else:
                     raise AutomataParserException("Bad input format.")
         except ValueError:

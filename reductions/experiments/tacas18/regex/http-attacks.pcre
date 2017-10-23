@@ -1,0 +1,8 @@
+/calendar(|[-_]admin)\.pl[\x00-\xff]*/Ui
+/db4web_c(\.exe)?\/.*(\.\.[\#\/]|[a-z]\:)[\x00-\xff]*/smiU
+/evtdump\x3f.*?\x2525[^\x20]*?\x20HTTP[\x00-\xff]*/i
+/instancename=[^&\x3b\r\n]{10}[\x00-\xff]*/smi
+/itemid=\d*[^\d\&\;\r\n][\x00-\xff]*/i
+/^GET\s+[^\x20]*\x2Ewm[zd][\x00-\xff]*/smi
+/mstshash\s*\x3d\s*Administr[\x00-\xff]*/smi
+/SILC\x2d\d\x2e\d[\x00-\xff]*/smi

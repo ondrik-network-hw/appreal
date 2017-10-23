@@ -24,16 +24,18 @@ import sys
 import getopt
 import pickle
 
-import nfa_parser
-import wfa_parser
-import core_parser
-import nfa
-import matrix_wfa
-import pruning_reduction as pruning
-import selfloop_reduction
+import parser.nfa_parser as nfa_parser
+import parser.wfa_parser as wfa_parser
+import parser.core_parser as core_parser
+import wfa.nfa as nfa
+import wfa.nfa_export as nfa_export
+import wfa.matrix_wfa as matrix_wfa
+import appred.pruning_reduction as pruning
+import label.states_weights as states_weights
+import appred.selfloop_reduction as selfloop_reduction
 
 #Load probabilities/weights from a file.
-LOAD = False
+LOAD = True
 #Folders where the probabilities/weights are stored.
 DIRECTORY = "subautomata"
 #File name prefix for files containing prob/weights.
@@ -42,10 +44,14 @@ FILEPROB = "prob"
 FILESELFLOOPS = "sefloops"
 
 #Divide NFA into subautomata.
-DIVIDE = False
+#DIVIDE = False
 RELATIVEEPS = True
 INTEGERPROGRAMMING = False
-REDUCTION_MODIF = False
+REDUCTION_MODIF = True
+APPROX = False
+WEIGHT_TYPE = states_weights.LabelType.prob_sigma
+#Sparse matrix representation
+SPARSE = True
 
 HELP = "Program for reducing NFAs according to a PA.\n"\
         "-p aut -- Input probabilistic automaton in Treba format.\n"\
@@ -139,6 +145,7 @@ def load_weights(directory, filename):
             with open("{0}/{1}{2}".format(directory, filename, i), 'rb') as f:
                 ld = pickle.load(f)
                 ret.update(ld)
+                #print ld
             i += 1
         except IOError:
             return ret
@@ -153,44 +160,25 @@ def export_selfloop_states(reduction):
     with open("{0}/{1}".format(DIRECTORY, FILESELFLOOPS), 'wb') as f:
         pickle.dump(reduction.get_selfloop_states(), f, pickle.HIGHEST_PROTOCOL)
 
-def compute_weight_sub(reduction):
-    """Divide NFA to subautomata and compute the weights from these subautomata.
+def get_selfloop_reduced_nfa(reduction, mode, restriction):
+    """Get a reduced NFA using the self-loop reduction.
 
-    Return: Numpy.matrix (weight of each state).
     Keyword arguments:
-    reduction -- Instance of class for the self-loop reduction.
+    reduction -- Reduction handler (SelfLoopReduction).
+    mode -- Reduction mode.
+    restriction -- Reduction restriction.
     """
-    subautomata = reduction.get_nfa().get_branch_subautomata()
-    i = 1
-    back_prob = dict()
-    for aut in subautomata:
-        red = selfloop_reduction.SelfLoopReduction(reduction.get_pa(), aut)
-        if red.get_nfa().is_unambiguous():
-            print("Unambiguous NFA {0}, computing product.".format(i))
-            ld = red.get_states_weight_product(matrix_wfa.ClosureMode.inverse, True)
+    reduced_aut = None
+    if mode == "eps":
+        reduced_aut = reduction.eps_reduction(restriction)
+        reduced_aut.__class__ = nfa.NFA
+    elif mode == "k":
+        if REDUCTION_MODIF:
+            reduced_aut = reduction.k_reduction_modif(restriction)
         else:
-            print("Not unambiguous NFA {0}, computing subautomata.".format(i))
-            ld = red.get_states_weight_subautomaton(matrix_wfa.ClosureMode.inverse, True)
-        back_prob.update(ld)
-        i += 1
-    return back_prob
-
-def compute_weight_all(reduction):
-    """Compute weights from the whole NFA.
-
-    Return: Numpy.matrix (weight of each state).
-    Keyword arguments:
-    reduction -- Instance of class for the self-loop reduction.
-    """
-    if reduction.get_nfa().is_unambiguous():
-        print("Input NFA is unambiguous, computing weights by a product.")
-        back_prob = reduction.get_states_weight_product(matrix_wfa.ClosureMode.inverse)
-        #print back_prob
-    else:
-        print("Input NFA is not unambiguous, computing weights by subautomata.")
-        back_prob = reduction.get_states_weight_subautomaton(matrix_wfa.ClosureMode.inverse, True)
-        #print back_prob
-    return back_prob
+            reduced_aut = reduction.k_reduction(restriction)
+        reduced_aut.__class__ = nfa.NFA
+    return reduced_aut
 
 def self_loop_reduction(pa, input_nfa, mode, restriction):
     """The self-loop reduction.
@@ -201,96 +189,62 @@ def self_loop_reduction(pa, input_nfa, mode, restriction):
     mode -- eps/k reduction
     restriction -- Value of the restriction parameter.
     """
-    reduction = selfloop_reduction.SelfLoopReduction(pa, input_nfa)
+    #pa.set_all_finals()
+    reduction = selfloop_reduction.SelfLoopReduction(pa, input_nfa, WEIGHT_TYPE)
     reduction.prepare()
     back_prob = dict()
-
-    if not reduction.is_pa_valid():
-        sys.stderr.write("Input PA must be deterministic, and support must be "\
-            "the universal automaton.\n")
-        return (None,None)
 
     if LOAD:
         back_prob_rev = load_weights(DIRECTORY, FILEWEIGHT)
         back_prob = {}
         rename_dict = reduction.get_nfa().get_rename_dict()
         for state, weight in back_prob_rev.iteritems():
+            if state == "lang":
+                continue
             back_prob[rename_dict[state]] = weight
+        reduction.set_labels(back_prob)
+        #print reduction.state_labels.get_labels()
     else:
-        if DIVIDE:
-            back_prob = compute_weight_sub(reduction)
-        else:
-            back_prob = compute_weight_all(reduction)
+        reduction.compute_labels(APPROX, SPARSE)
 
-    if mode == "eps":
-        reduced_aut = reduction.eps_reduction(back_prob, restriction)
-        reduced_aut.__class__ = nfa.NFA
-    elif mode == "k":
-        if REDUCTION_MODIF:
-            reduced_aut = reduction.k_reduction_modif(back_prob, restriction)
-        else:
-            reduced_aut = reduction.k_reduction(back_prob, restriction)
-        reduced_aut.__class__ = nfa.NFA
-    else:
-        reduced_aut = None
+    reduced_aut = get_selfloop_reduced_nfa(reduction, mode, restriction)
 
     err = 0.0
+    back_prob = reduction.state_labels.get_labels()
     for state in reduction.get_selfloop_states():
         err += back_prob[state]
     return (reduced_aut, err)
 
-def compute_prob_sub(reduction):
-    """Divide NFA to subautomata and compute the probabilities from
-    these subautomata.
+def get_pruning_reduced_nfa(reduction, mode, restriction):
+    """Get a reduced NFA using the pruning reduction.
 
-    Return: Numpy.matrix (probability of each final state).
     Keyword arguments:
-    reduction -- Instance of class for the pruning reduction.
+    reduction -- Reduction handler (PruningReduction).
+    mode -- Reduction mode.
+    restriction -- Reduction restriction.
     """
-    subautomata = reduction.get_nfa().get_branch_subautomata()
-    back_prob = dict()
-    i = 1
-    for aut in subautomata:
-        red = pruning.PruningReduction(reduction.get_pa(), aut)
-        if red.get_nfa().is_unambiguous():
-            print("Unambiguous NFA {0}, computing product.".format(i))
-            ld = red.get_finals_prob_product(matrix_wfa.ClosureMode.inverse, True)
+    reduced_aut = None
+    if mode == "eps":
+        if INTEGERPROGRAMMING:
+            subautomata = reduction.get_nfa().get_branch_subautomata()
+            reduced_aut = reduction.eps_reduction_lp(subautomata, restriction)
         else:
-            print("Not unambiguous NFA {0}, computing subautomata.".format(i))
-            ld = red.get_finals_prob_subautomaton(matrix_wfa.ClosureMode.inverse, True)
-        back_prob.update(ld)
-        i += 1
-    return back_prob
-
-def compute_prob_all(reduction):
-    """Compute probabilities from the whole NFA.
-
-    Return: Numpy.matrix (probability of each final state).
-    Keyword arguments:
-    reduction -- Instance of class for the pruning reduction.
-    """
-    if reduction.get_nfa().is_unambiguous():
-        print("Input NFA is unambiguous, computing probabilities by a product.")
-        back_prob = reduction.get_finals_prob_product(matrix_wfa.ClosureMode.inverse)
-    else:
-        print("Input NFA is not unambiguous, computing probabilities by subautomata.")
-        back_prob = reduction.get_finals_prob_subautomaton(matrix_wfa.ClosureMode.inverse, True)
-    return back_prob
-
-def get_back_prob(reduction):
-    back_prob = dict()
-    if LOAD:
-        back_prob_rev = load_weights(DIRECTORY, FILEPROB)
-        back_prob = {}
-        rename_dict = reduction.get_nfa().get_rename_dict()
-        for state, weight in back_prob_rev.iteritems():
-            back_prob[rename_dict[state]] = weight
-    else:
-        if DIVIDE:
-            back_prob = compute_prob_sub(reduction)
+            reduced_aut = reduction.eps_reduction_greedy(restriction)
+        reduced_aut.__class__ = nfa.NFA
+    elif mode == "k":
+        if INTEGERPROGRAMMING:
+            subautomata = reduction.get_nfa().get_branch_subautomata()
+            if REDUCTION_MODIF:
+                reduced_aut = reduction.k_reduction_lp_modif(subautomata, restriction)
+            else:
+                reduced_aut = reduction.k_reduction_lp(subautomata, restriction)
         else:
-            back_prob = compute_prob_all(reduction)
-    return back_prob
+            if REDUCTION_MODIF:
+                reduced_aut = reduction.k_reduction_greedy(restriction)
+            else:
+                reduced_aut = reduction.k_reduction(restriction)
+        reduced_aut.__class__ = nfa.NFA
+    return reduced_aut
 
 def pruning_reduction(pa, input_nfa, mode, restriction):
     """The pruning reduction.
@@ -303,42 +257,48 @@ def pruning_reduction(pa, input_nfa, mode, restriction):
     """
     reduction = pruning.PruningReduction(pa, input_nfa)
     reduction.prepare()
-    #back_prob = dict()
-    subautomata = None
 
-    back_prob = get_back_prob(reduction)
-
-    if mode == "eps":
-        if INTEGERPROGRAMMING:
-            if subautomata is None:
-                subautomata = reduction.get_nfa().get_branch_subautomata()
-            reduced_aut = reduction.eps_reduction_lp(back_prob, subautomata, restriction)
-        else:
-            reduced_aut = reduction.eps_reduction(back_prob, restriction)
-        reduced_aut.__class__ = nfa.NFA
-    elif mode == "k":
-        if INTEGERPROGRAMMING:
-            if subautomata is None:
-                subautomata = reduction.get_nfa().get_branch_subautomata()
-            if REDUCTION_MODIF:
-                reduced_aut = reduction.k_reduction_lp_modif(back_prob, subautomata, restriction)
-            else:
-                reduced_aut = reduction.k_reduction_lp(back_prob, subautomata, restriction)
-        else:
-            if REDUCTION_MODIF:
-                reduced_aut = reduction.k_reduction_modif(back_prob, restriction)
-            else:
-                reduced_aut = reduction.k_reduction(back_prob, restriction)
-        reduced_aut.__class__ = nfa.NFA
+    if LOAD:
+        back_prob_rev = load_weights(DIRECTORY, FILEPROB)
+        back_prob = {}
+        rename_dict = reduction.get_nfa().get_rename_dict()
+        for state, weight in back_prob_rev.iteritems():
+            back_prob[rename_dict[state]] = weight
+        reduction.set_labels(back_prob)
     else:
-        reduced_aut = None
+        reduction.compute_labels(APPROX, SPARSE)
+
+    reduced_aut = get_pruning_reduced_nfa(reduction, mode, restriction)
 
     err = 0.0
+    back_prob = reduction.get_labels()
     for state in reduction.get_removed_finals():
         err += back_prob[state]
 
     return (reduced_aut, err)
 
+def write_results(params, red_aut):
+    """Write the results of the reduction into files.
+
+    Keyword arguments:
+    params -- Program parameters.
+    red_aut -- Reduced NFA.
+    """
+    red_aut.__class__ = nfa_export.NFAExport
+    try:
+        fhandle = open(params.output, 'w')
+        fhandle.write(red_aut.to_fa_format(True))
+        fhandle.close()
+    except IOError as e:
+        sys.stderr.write("Error during writing to FA output file: {0}\n".format(e.message))
+
+    if params.dot is not None:
+        try:
+            fhandle = open(params.dot, 'w')
+            fhandle.write(red_aut.to_dot(True))
+            fhandle.close()
+        except IOError as e:
+            sys.stderr.write("Error during writing to DOT output file: {0}\n".format(e.message))
 
 def main():
     """Main for approximate reductions of automata.
@@ -355,23 +315,17 @@ def main():
         sys.stderr.write("Restriction parameter must be in range [0,1].\n")
         sys.exit(1)
 
-    parser_nfa = nfa_parser.NFAParser()
-    parser_wfa = wfa_parser.WFAParser()
-
     input_nfa = None
     pa = None
 
     try:
-        input_nfa = parser_nfa.fa_to_nfa(params.input_nfa)
-        pa = parser_wfa.treba_to_wfa(params.pa)
+        input_nfa = nfa_parser.NFAParser.fa_to_nfa(params.input_nfa)
+        pa =  wfa_parser.WFAParser.treba_to_wfa(params.pa)
     except IOError as e:
         sys.stderr.write("I/O error: {0}\n".format(e.strerror))
         sys.exit(1)
     except core_parser.AutomataParserException as e:
         sys.stderr.write("Error during parsing NFA or WFA: {0}\n".format(e.msg))
-        sys.exit(1)
-    except Exception as e:
-        sys.stderr.write("Error during parsing input files: {0}\n".format(e.message))
         sys.exit(1)
 
     input_nfa.get_trim_automaton()
@@ -388,26 +342,16 @@ def main():
     else:
         red_aut, err = pruning_reduction(pa, input_nfa, params.mode, params.restriction)
 
+    print "NFA: {0}, PA: {1}".format(params.input_nfa, params.pa)
+    print "#States (original): {0}, #States (reduced): {1}".format(len(input_nfa.get_states()), len(red_aut.get_states()))
+    print "Mode: {0}, Restriction: {1}, REDUCTION_MODIF: {2}, LOAD: {3}, WEIGHT_TYPE: {4}, SPARSE: {5}, THRESHOLD: {6}".format(params.mode, params.restriction, REDUCTION_MODIF, LOAD, WEIGHT_TYPE, SPARSE, matrix_wfa.THRESHOLD)
     print "The distance upperbound is {0}".format(min(err, 1.0))
 
     if red_aut is None:
         sys.stderr.write("Error during NFA reduction.\n")
         sys.exit(1)
 
-    try:
-        fhandle = open(params.output, 'w')
-        fhandle.write(red_aut.to_fa_format(True))
-        fhandle.close()
-    except IOError as e:
-        sys.stderr.write("Error during writing to FA output file: {0}\n".format(e.message))
-
-    if params.dot is not None:
-        try:
-            fhandle = open(params.dot, 'w')
-            fhandle.write(red_aut.to_dot(True))
-            fhandle.close()
-        except IOError as e:
-            sys.stderr.write("Error during writing to DOT output file: {0}\n".format(e.message))
+    write_results(params, red_aut)
     sys.exit(0)
 
 if __name__ == "__main__":

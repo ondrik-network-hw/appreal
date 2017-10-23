@@ -26,9 +26,9 @@ from scapy.utils import os
 import sys
 import getopt
 
-import core_parser
-import nfa_parser as parser
-import aux_functions as aux
+import parser.core_parser as core_parser
+import parser.nfa_parser as parser
+import wfa.aux_functions as aux
 
 import scapy.all
 
@@ -114,24 +114,19 @@ def main():
         print(HELP)
         sys.exit(0)
 
-    nfa_parser = parser.NFAParser()
-
     input_nfa = None
     input_string = params.input_string
     reader = None
 
     try:
         if params.input_nfa != None:
-            input_nfa = nfa_parser.fa_to_nfa(params.input_nfa)
+            input_nfa = parser.NFAParser.fa_to_nfa(params.input_nfa)
         reader = PcapReader(params.pcap)
     except IOError as e:
         sys.stderr.write("I/O error: {0}\n".format(e.strerror))
         sys.exit(1)
     except core_parser.AutomataParserException as e:
         sys.stderr.write("Error during parsing NFA: {0}\n".format(e.msg))
-        sys.exit(1)
-    except Exception as e:
-        sys.stderr.write("Error during parsing input files: {0}\n".format(e.message))
         sys.exit(1)
 
 

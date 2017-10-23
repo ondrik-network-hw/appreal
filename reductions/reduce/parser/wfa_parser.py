@@ -20,9 +20,9 @@ You should have received a copy of the GNU General Public License.
 If not, see <http://www.gnu.org/licenses/>.
 """
 
-from core_wfa import CoreWFA, Transition
-from core_parser import AutomataParser, AutomataParserException
-import aux_functions as aux
+from wfa.core_wfa import CoreWFA, Transition
+from parser.core_parser import AutomataParser, AutomataParserException
+import wfa.aux_functions as aux
 
 class WFAParser(AutomataParser):
     """Class for parsing WFAs.
@@ -38,9 +38,61 @@ class WFAParser(AutomataParser):
         Keyword arguments:
         filename -- name of a file containing representation of an NFA.
         """
-        return self.treba_to_wfa(filename)
+        return WFAParser.treba_to_wfa(filename)
 
-    def treba_to_wfa(self, filename):
+    @staticmethod
+    def _parse_vtf_pair(string):
+        trimmed = string.strip()
+        splt = trimmed.split(":")
+        splt[0] = int(splt[0])
+        splt[1] = float(splt[1])
+        return splt
+
+    @staticmethod
+    def _parse_vtf_states(string):
+        state_dict = {}
+        splt = string.split(" ")
+        for item in splt:
+            if len(item.strip()) != 0:
+                div = WFAParser._parse_vtf_pair(item)
+                state_dict[div[0]] = div[1]
+        return state_dict
+
+    @staticmethod
+    def _parse_vtf_transition(string):
+        splt = string.split(" ")
+        splt = [x for x in splt if len(x.strip()) > 0]
+        symbol, weight = WFAParser._parse_vtf_pair(splt[1])
+        return Transition(int(splt[0]), int(splt[2]), symbol, weight)
+
+
+    @staticmethod
+    def vtf_to_wfa(filename):
+        fhandle = open(filename, 'r')
+        initials = None
+        finals = None
+        dpa = False
+        transitions = []
+
+        for line in fhandle:
+            line = line.strip()
+            if line.startswith("%Initial"):
+                initials = WFAParser._parse_vtf_states(line[9:])
+            elif line.startswith("%Final"):
+                finals = WFAParser._parse_vtf_states(line[7:])
+            elif line.startswith("@DPA"):
+                dpa = True
+            else:
+                transitions.append(WFAParser._parse_vtf_transition(line))
+
+        if (initials is None) or (finals is None) or (not dpa):
+            raise AutomataParserException("Automaton must contain @DPA, %Initial and %Final label.")
+
+        fhandle.close()
+        return CoreWFA(transitions, finals, initials)
+
+    @staticmethod
+    def treba_to_wfa(filename):
         """Parse NFA from Treba format.
         If fails raise AutomataParserException.
 
@@ -54,12 +106,9 @@ class WFAParser(AutomataParser):
         transitions = []
         finals = dict()
 
-        #if use_table and self.table != None:
-        #    inv_table = {v: k for k, v in self.table.iteritems()}
-
         try:
             for line in fhandle:
-                spl = line.split()
+                spl = line.split(" ")
                 if len(spl) == 4:
                     if inv_table != None: #Obsolete -- do not use
                         transitions.append(Transition(int(spl[0]), int(spl[1]), aux.convert_to_pritable(inv_table[int(spl[2])]), float(spl[3])))

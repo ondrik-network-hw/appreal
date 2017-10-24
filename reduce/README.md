@@ -49,12 +49,7 @@ An example of the content of a file describing a PA:
 ```
 
 ## Experiments
-For experiments fill in variables in files `prepare.sh`, `experiments-size.sh`, 
-`experiments-error.sh` (name of the NFA, PA, path to [Reduce tool](http://languageinclusion.org/doku.php?id=tools)). 
-Script `prepare.sh` prepare a NFA for an experiment (it is necessary to 
-run this script before running any of `experiments-size.sh` and 
-`experiments-error.sh`). Each run of the scripts `experiments-size.sh` and 
-`experiments-error.sh` reduces one NFA with various reduction parameters.
+To re-run our experiments, please follow these steps:
 
 1. Install the necessary requirements
 ```
@@ -72,7 +67,7 @@ cd reduce
 [edit prepare.sh]
 ./prepare.sh
 ```
-4. Run the experiments (note that this step can take some time) by setting the paths in `experiments-size.sh` and `experiments-error.sh` and running the scripts
+4. Run the experiments (note that this step can take some time) by setting the paths and parameters in `experiments-size.sh` and `experiments-error.sh` and running the scripts
 ```
 ./experiments-size.sh
 ```

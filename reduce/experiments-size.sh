@@ -1,16 +1,26 @@
-#!/bin/sh
+#!/bin/bash
 
 #Name of a PA
-pa="*"
+pa="http-protocol-prob"
+
 #Name of a NFA (for storing results)
-name="*.reduced"
+# name="http-attacks.reduced"
+name="http-malicious.reduced"
+# name="http-backdoor.reduced"
+
 #NFA file
-nfa="*.reduced.fa"
+# nfa="http-attacks.reduced.fa"
+nfa="http-malicious.reduced.fa"
+# nfa="http-backdoor.reduced.fa"
+
 #Reduce path
-reduce="*"
+reduce="../RABIT243/Reduce.jar"
+
+export PYTHONPATH="."
 
 echo "Experiment with a PA ${pa}.fa"
 
+mkdir -p tacas18
 touch tacas18/${name}-${pa}.log
 
 file_labels="tacas18/${name}-${pa}-labels.log"

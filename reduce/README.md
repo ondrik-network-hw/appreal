@@ -60,19 +60,19 @@ run this script before running any of `experiments-size.sh` and
 ```
 pip install fado bitarray pulp scipy numpy scapy
 ```
-1. Download and extract the [Reduce tool](http://languageinclusion.org/doku.php?id=tools)) into the root directory
+2. Download and extract the [Reduce tool](http://languageinclusion.org/doku.php?id=tools)) into the root directory
 ```
 [in the repository's root directory]
 wget -O rabit.tar.gz 'http://languageinclusion.org/lib/exe/fetch.php?media=rabit2.4.3.tar.gz'
 tar xzvf rabit.tar.gz
 ```
-1. Set the paths in `prepare.sh` to the correct ones and prepare the automaton
+3. Set the paths in `prepare.sh` to the correct ones and prepare the automaton
 ```
 cd reduce
 [edit prepare.sh]
 ./prepare.sh
 ```
-1. Run the experiments (note that this step can take some time) by setting the paths in `experiments-size.sh` and `experiments-error.sh` and running the scripts
+4. Run the experiments (note that this step can take some time) by setting the paths in `experiments-size.sh` and `experiments-error.sh` and running the scripts
 ```
 ./experiments-size.sh
 ```

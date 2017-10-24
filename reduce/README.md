@@ -49,12 +49,28 @@ An example of the content of a file describing a PA:
 ```
 
 ## Experiments
-For experiments fill in variables in files *prepare.sh*, *experiments-size.sh*, 
-*experiments-error.sh* (name of the NFA, PA, path to [Reduce tool](http://languageinclusion.org/doku.php?id=tools)). 
-Script *prepare.sh* prepare a NFA for an experiment (it is necessary to 
-run this script before running any of *experiments-size.sh* and 
-*experiments-error.sh*). Each run of the scripts *experiments-size.sh* and 
-*experiments-error.sh* reduces one NFA with various reduction parameters.
+For experiments fill in variables in files `prepare.sh`, `experiments-size.sh`, 
+`experiments-error.sh` (name of the NFA, PA, path to [Reduce tool](http://languageinclusion.org/doku.php?id=tools)). 
+Script `prepare.sh` prepare a NFA for an experiment (it is necessary to 
+run this script before running any of `experiments-size.sh` and 
+`experiments-error.sh`). Each run of the scripts `experiments-size.sh` and 
+`experiments-error.sh` reduces one NFA with various reduction parameters.
+
+1. Download and extract the [Reduce tool](http://languageinclusion.org/doku.php?id=tools)) into the root directory
+
+```
+[in the repository's root directory]
+wget -O rabit.tar.gz 'http://languageinclusion.org/lib/exe/fetch.php?media=rabit2.4.3.tar.gz'
+tar xzvf rabit.tar.gz
+```
+
+1. Set the paths in `prepare.sh` to the correct ones
+
+```
+cd reduce
+[edit prepare.sh]
+./prepare.sh
+```
 
 ## Contributors
-- Vojtěch Havlena <ihavlena[at]fit.vutbr.cz>
+- Vojtěch Havlena `<ihavlena[at]fit.vutbr.cz>`

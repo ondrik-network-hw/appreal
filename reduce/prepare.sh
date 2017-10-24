@@ -1,9 +1,14 @@
 #!/bin/sh
 
 #Name of an NFA
-name="*"
+name="http-attacks"
+# name="http-malicious"
+# name="http-backdoor"
+
 #Reduce path
-reduce="*"
+reduce="../RABIT243/Reduce.jar"
+
+export PYTHONPATH="."
 
 echo "Converting to BA format"
 python tools/to_format.py -i ../experiments/tacas18/${name}.fa -f fa -o ../experiments/tacas18/${name}.ba -t ba

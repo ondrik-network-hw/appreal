@@ -60,7 +60,7 @@ run this script before running any of `experiments-size.sh` and
 ```
 pip install fado bitarray pulp scipy numpy scapy
 ```
-2. Download and extract the [Reduce tool](http://languageinclusion.org/doku.php?id=tools)) into the root directory
+2. Download and extract the [Reduce tool](http://languageinclusion.org/doku.php?id=tools) into the root directory
 ```
 [in the repository's root directory]
 wget -O rabit.tar.gz 'http://languageinclusion.org/lib/exe/fetch.php?media=rabit2.4.3.tar.gz'

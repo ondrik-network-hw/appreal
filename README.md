@@ -1,6 +1,6 @@
 # AppReAL - Approximate Reduction of Automata and Languages
 
-This repository contains a tool for (language non-preserving) reduction of non-deterministic finite automata (NFAs) wrt a probabilistic model (see the [technical report](link)) for more details.
+This repository contains a tool for (language non-preserving) reduction of non-deterministic finite automata (NFAs) wrt a probabilistic model (see the [technical report](https://arxiv.org/abs/1710.08647)) for more details.
 The particular setting considered here is the reduction of NFAs obtained from PCREs (Perl compatible regular expressions) that occur in [Snort](https://www.snort.org) rules.
 
 ## Contents of directories

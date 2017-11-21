@@ -47,4 +47,3 @@
 /\x2FGR\d+\x3B\d+/smi
 /^\x2FNFO\x2CRegistered\s+Owner\x3A\s+[^\r\n]*\x0D\x0ACurrent\s+user\x3A\s+/smi
 /^\xc0STATUS\xc0Server\s\x3A\sKeylogging\sStarted\!$/smi
-

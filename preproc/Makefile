@@ -7,7 +7,6 @@
 # TODO: the Makefile is quite messy, someone might try to clean it
 
 CFLAGS=-std=c++11 \
-  -D_BSD_SOURCE \
   -pedantic-errors \
   -Wextra \
   -Wall \

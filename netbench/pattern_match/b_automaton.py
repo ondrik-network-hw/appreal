@@ -2103,7 +2103,9 @@ class b_Automaton(b_ptrn_match):
         k.sort()
         for state in k:
             for transition in states[state]:
-                fw.write("s" + str(transition[1]) + "(q" + str(transition[0]) + ") -> q" + str(transition[2]) + "\n")
+                # fw.write("s" + str(transition[1]) + "(q" + str(transition[0]) + ") -> q" + str(transition[2]) + "\n")
+                fw.write("s" + str(self._automaton.alphabet[transition[1]].export_symbol()) + "(q" + str(transition[0]) + ") -> q" + str(transition[2]) + "\n")
+
         fw.close()
 
     ###########################################################################

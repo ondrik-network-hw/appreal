@@ -27,7 +27,7 @@ LIBS=-lpcap
 
 .PHONY: all clean
 
-all: pcap-sane pcap-histo pcap-freq-extr pcap-enc-filter
+all: pcap-sane pcap-histo pcap-freq-extr pcap-enc-filter pcap-sampler
 
 pcap-sane: pcap-sane.o pcap-util.o
 	g++ $< $(LIBS) pcap-util.o -o $@
@@ -40,6 +40,9 @@ pcap-freq-extr: pcap-freq-extr.o pcap-util.o
 
 pcap-enc-filter: pcap-enc-filter.o pcap-util.o
 	g++ $< $(LIBS) random/randtest.o pcap-util.o -o $@
+
+pcap-sampler: pcap-sampler.o pcap-util.o
+	g++ $< $(LIBS) pcap-util.o -o $@
 
 %.o: %.cc
 	g++ $(CFLAGS) -c -o $@ $<

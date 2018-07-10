@@ -51,7 +51,7 @@ int main(int argc, char** argv)
 	{
 		try
 		{
-			unsigned freq = std::stoi(argv[1]);
+			freq = std::stoi(argv[1]);
 			if (freq == 0)
 			{
 				throw std::runtime_error("0 not allowed!");
